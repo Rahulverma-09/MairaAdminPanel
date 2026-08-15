@@ -1,0 +1,23 @@
+{
+  "cleanUrls": true,
+  "rewrites": [
+    { "source": "/", "destination": "/index.html" },
+    { "source": "/login", "destination": "/index.html" },
+    { "source": "/dashboard", "destination": "/html/dashboard.html" },
+    { "source": "/dashboard.html", "destination": "/html/dashboard.html" },
+    { "source": "/products", "destination": "/html/products.html" },
+    { "source": "/products.html", "destination": "/html/products.html" },
+    { "source": "/categories", "destination": "/html/categories.html" },
+    { "source": "/categories.html", "destination": "/html/categories.html" },
+    { "source": "/orders", "destination": "/html/orders.html" },
+    { "source": "/orders.html", "destination": "/html/orders.html" },
+    { "source": "/payments", "destination": "/html/payments.html" },
+    { "source": "/payments.html", "destination": "/html/payments.html" },
+    { "source": "/faq", "destination": "/html/faq.html" },
+    { "source": "/faq.html", "destination": "/html/faq.html" },
+    { "source": "/contact", "destination": "/html/contact.html" },
+    { "source": "/contact.html", "destination": "/html/contact.html" },
+    { "source": "/settings", "destination": "/html/settings.html" },
+    { "source": "/settings.html", "destination": "/html/settings.html" }
+  ]
+}

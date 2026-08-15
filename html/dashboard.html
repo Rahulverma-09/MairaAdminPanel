@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Maira Jewels — Admin Dashboard</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,600&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../css/admin.css">
+</head>
+<body class="admin-body">
+    <!-- Sidebar -->
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar__brand">
+            <img src="../public/MairaLogo.png" alt="Maira Jewels" class="sidebar__logo">
+            <div class="sidebar__brand-text">
+                <h2>MAIRA JEWELS</h2>
+                <p>Admin Panel</p>
+            </div>
+        </div>
+        <nav class="sidebar__nav">
+            <a href="dashboard.html" class="sidebar__link active" data-section="dashboard">
+                <span class="sidebar__icon"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="7" height="9" x="3" y="3" rx="1"/><rect width="7" height="5" x="14" y="3" rx="1"/><rect width="7" height="9" x="14" y="12" rx="1"/><rect width="7" height="5" x="3" y="16" rx="1"/></svg></span> Dashboard
+            </a>
+            <a href="products.html" class="sidebar__link" data-section="products">
+                <span class="sidebar__icon"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m7.5 4.27 9 5.15"/><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="m3.3 7 8.7 5 8.7-5"/><path d="M12 22V12"/></svg></span> Products
+            </a>
+            <a href="categories.html" class="sidebar__link" data-section="categories">
+                <span class="sidebar__icon"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 5 6.3 6.3a2.4 2.4 0 0 1 0 3.4L17 19"/><path d="M9.586 5.586A2 2 0 0 0 8.172 5H3v5.172a2 2 0 0 0 .586 1.414l8.293 8.293a2 2 0 0 0 2.828 0l5.172-5.172a2 2 0 0 0 0-2.828z"/><circle cx="6.5" cy="8.5" r="1.5"/></svg></span> Categories
+            </a>
+            <a href="orders.html" class="sidebar__link" data-section="orders">
+                <span class="sidebar__icon"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="21" r="1"/><circle cx="19" cy="21" r="1"/><path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"/></svg></span> Orders
+            </a>
+            <a href="payments.html" class="sidebar__link" data-section="payments">
+                <span class="sidebar__icon"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="14" x="2" y="5" rx="2"/><line x1="2" x2="22" y1="10" y2="10"/></svg></span> Payments
+            </a>
+            <a href="faq.html" class="sidebar__link" data-section="faq">
+                <span class="sidebar__icon"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><path d="M12 17h.01"/></svg></span> FAQ Management
+            </a>
+            <a href="contact.html" class="sidebar__link" data-section="contact">
+                <span class="sidebar__icon"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg></span> Contact Management
+            </a>
+            <a href="settings.html" class="sidebar__link" data-section="settings">
+                <span class="sidebar__icon"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg></span> Settings
+            </a>
+        </nav>
+        <div class="sidebar__footer">
+            <div class="admin-user">
+                <div class="admin-user__avatar" id="admin-avatar">A</div>
+                <div>
+                    <p class="admin-user__name" id="admin-name">Admin</p>
+                    <p class="admin-user__role">Administrator</p>
+                </div>
+            </div>
+            <button class="btn btn--logout" id="logout-btn">Log Out</button>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <!-- Dashboard Section -->
+        <section class="section active" id="section-dashboard">
+            <div class="stats-grid">
+                <div class="stat-card stat-card--gold">
+                    <div class="stat-card__content">
+                        <span class="stat-card__label">Total Products</span>
+                        <h3 class="stat-card__value" id="stat-products">0</h3>
+                    </div>
+                    <div class="stat-card__icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h12l4 6-10 13L2 9Z"/><path d="M11 3 8 9l4 13 4-13-3-6"/><path d="M2 9h20"/></svg>
+                    </div>
+                </div>
+                <div class="stat-card stat-card--bronze">
+                    <div class="stat-card__content">
+                        <span class="stat-card__label">Categories</span>
+                        <h3 class="stat-card__value" id="stat-categories">0</h3>
+                    </div>
+                    <div class="stat-card__icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 5 6.3 6.3a2.4 2.4 0 0 1 0 3.4L17 19"/><path d="M9.586 5.586A2 2 0 0 0 8.172 5H3v5.172a2 2 0 0 0 .586 1.414l8.293 8.293a2 2 0 0 0 2.828 0l5.172-5.172a2 2 0 0 0 0-2.828z"/><circle cx="6.5" cy="8.5" r="1.5"/></svg>
+                    </div>
+                </div>
+                <div class="stat-card stat-card--emerald">
+                    <div class="stat-card__content">
+                        <span class="stat-card__label">Total Orders</span>
+                        <h3 class="stat-card__value" id="stat-orders">0</h3>
+                    </div>
+                    <div class="stat-card__icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/><path d="M3 6h18"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+                    </div>
+                </div>
+                <div class="stat-card stat-card--indigo">
+                    <div class="stat-card__content">
+                        <span class="stat-card__label">Payments</span>
+                        <h3 class="stat-card__value" id="stat-payments">0</h3>
+                    </div>
+                    <div class="stat-card__icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="14" x="2" y="5" rx="2"/><line x1="2" x2="22" y1="10" y2="10"/></svg>
+                    </div>
+                </div>
+                <div class="stat-card stat-card--violet">
+                    <div class="stat-card__content">
+                        <span class="stat-card__label">Total FAQs</span>
+                        <h3 class="stat-card__value" id="stat-faqs">0</h3>
+                    </div>
+                    <div class="stat-card__icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/></svg>
+                    </div>
+                </div>
+                <div class="stat-card stat-card--rose">
+                    <div class="stat-card__content">
+                        <span class="stat-card__label">Messages</span>
+                        <h3 class="stat-card__value" id="stat-messages">0</h3>
+                    </div>
+                    <div class="stat-card__icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sales Analytics Charts -->
+            <div class="analytics-grid">
+                <div class="card">
+                    <div class="card__header">
+                        <div>
+                            <h3>Sales & Revenue Trend</h3>
+                            <p class="card__subtitle">Monthly sales revenue performance</p>
+                        </div>
+                        <span class="chart-badge">↑ +18.4% Growth</span>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="salesTrendChart"></canvas>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card__header">
+                        <div>
+                            <h3>Sales by Category</h3>
+                            <p class="card__subtitle">Revenue distribution by category</p>
+                        </div>
+                    </div>
+                    <div class="chart-container chart-container--pie">
+                        <canvas id="categoryPieChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <div class="dashboard-grid">
+                <div class="card">
+                    <div class="card__header">
+                        <h3>Recent Orders</h3>
+                        <a href="orders.html" class="card__link">View All →</a>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Order #</th>
+                                    <th>Customer</th>
+                                    <th>Total</th>
+                                    <th>Status</th>
+                                    <th>Date</th>
+                                </tr>
+                            </thead>
+                            <tbody id="recent-orders-table"></tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card__header">
+                        <h3>Recent Messages</h3>
+                        <a href="contact.html" class="card__link">View All →</a>
+                    </div>
+                    <div id="recent-messages-list" class="message-list"></div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="toast"></div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="../js/storage.js"></script>
+    <script src="../js/common.js"></script>
+    <script src="../js/dashboard.js"></script>
+</body>
+</html>
