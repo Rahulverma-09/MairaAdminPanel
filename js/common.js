@@ -154,11 +154,30 @@ function initLayout(activeSection) {
     }
 
     // Sidebar toggle (mobile)
-    const sidebarToggle = document.getElementById('sidebar-toggle');
+    let sidebarBackdrop = document.getElementById('sidebar-backdrop');
+    if (!sidebarBackdrop) {
+        sidebarBackdrop = document.createElement('div');
+        sidebarBackdrop.id = 'sidebar-backdrop';
+        sidebarBackdrop.className = 'sidebar-backdrop';
+        document.body.appendChild(sidebarBackdrop);
+    }
+
     const sidebar = document.getElementById('sidebar');
-    if (sidebarToggle && sidebar) {
-        sidebarToggle.addEventListener('click', () => {
-            sidebar.classList.toggle('open');
+    const toggleBtns = document.querySelectorAll('.mobile-menu-btn, #sidebar-toggle');
+    
+    toggleBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+            if (sidebar) {
+                sidebar.classList.toggle('open');
+                sidebarBackdrop.classList.toggle('open', sidebar.classList.contains('open'));
+            }
+        });
+    });
+
+    if (sidebarBackdrop && sidebar) {
+        sidebarBackdrop.addEventListener('click', () => {
+            sidebar.classList.remove('open');
+            sidebarBackdrop.classList.remove('open');
         });
     }
 
