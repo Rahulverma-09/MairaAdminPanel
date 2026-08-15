@@ -4,12 +4,13 @@
   "description": "Admin Panel for Maira Jewels",
   "main": "index.html",
   "scripts": {
-    "dev": "serve ."
+    "dev": "serve .",
+    "start": "serve ."
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "devDependencies": {
-    "serve": "^14.2.6"
+  "dependencies": {
+    "serve": "^14.2.4"
   }
 }
