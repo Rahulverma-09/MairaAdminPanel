@@ -11,6 +11,8 @@
     { "source": "/categories.html", "destination": "/html/categories.html" },
     { "source": "/orders", "destination": "/html/orders.html" },
     { "source": "/orders.html", "destination": "/html/orders.html" },
+    { "source": "/customers", "destination": "/html/customers.html" },
+    { "source": "/customers.html", "destination": "/html/customers.html" },
     { "source": "/payments", "destination": "/html/payments.html" },
     { "source": "/payments.html", "destination": "/html/payments.html" },
     { "source": "/faq", "destination": "/html/faq.html" },

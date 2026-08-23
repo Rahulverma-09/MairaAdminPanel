@@ -160,6 +160,75 @@ function initCharts() {
     }
 }
 
+async function loadDashboardData() {
+    // 1. Fetch live Products
+    try {
+        if (typeof API !== 'undefined' && API.getProducts) {
+            const res = await API.getProducts();
+            if (res && res.data) {
+                const prods = Array.isArray(res.data) ? res.data : (res.data.products || []);
+                Storage.saveProducts(prods);
+            }
+        }
+    } catch (e) {
+        console.warn('[Dashboard] Could not fetch products from API:', e.message);
+    }
+
+    // 2. Fetch live Categories
+    try {
+        if (typeof API !== 'undefined' && API.getCategories) {
+            const res = await API.getCategories();
+            if (res && res.data) {
+                const cats = Array.isArray(res.data) ? res.data : (res.data.categories || []);
+                Storage.saveCategories(cats);
+            }
+        }
+    } catch (e) {
+        console.warn('[Dashboard] Could not fetch categories from API:', e.message);
+    }
+
+    // 3. Fetch live Orders
+    try {
+        if (typeof API !== 'undefined' && API.getOrders) {
+            const res = await API.getOrders();
+            if (res && res.data) {
+                const ords = Array.isArray(res.data) ? res.data : (res.data.orders || []);
+                Storage.saveOrders(ords);
+            }
+        }
+    } catch (e) {
+        console.warn('[Dashboard] Could not fetch orders from API:', e.message);
+    }
+
+    // 4. Fetch live FAQs
+    try {
+        if (typeof API !== 'undefined' && API.getFaqs) {
+            const res = await API.getFaqs();
+            if (res && res.data) {
+                const faqs = Array.isArray(res.data) ? res.data : (res.data.faqs || []);
+                Storage.saveFaqs(faqs);
+            }
+        }
+    } catch (e) {
+        console.warn('[Dashboard] Could not fetch FAQs from API:', e.message);
+    }
+
+    // 5. Fetch live Messages
+    try {
+        if (typeof API !== 'undefined' && API.getContactMessages) {
+            const res = await API.getContactMessages();
+            if (res && res.data) {
+                const msgs = Array.isArray(res.data) ? res.data : (res.data.contacts || res.data.messages || []);
+                Storage.saveMessages(msgs);
+            }
+        }
+    } catch (e) {
+        console.warn('[Dashboard] Could not fetch messages from API:', e.message);
+    }
+
+    renderDashboard();
+}
+
 function renderDashboard() {
     const products = Storage.getProducts();
     const categories = Storage.getCategories();
@@ -184,39 +253,43 @@ function renderDashboard() {
     if (statFaqs) statFaqs.textContent = faqs.length;
 
     // Recent orders
-    const recentOrders = [...orders].sort((a, b) => new Date(b.date) - new Date(a.date)).slice(0, 5);
+    const recentOrders = [...orders].sort((a, b) => new Date(b.date || b.createdAt || 0) - new Date(a.date || a.createdAt || 0)).slice(0, 5);
     const recentOrdersTable = document.getElementById('recent-orders-table');
     if (recentOrdersTable) {
         if (recentOrders.length === 0) {
             recentOrdersTable.innerHTML = '<tr><td colspan="5" class="empty-state">No orders yet</td></tr>';
         } else {
-            recentOrdersTable.innerHTML = recentOrders.map(order => `
+            recentOrdersTable.innerHTML = recentOrders.map(order => {
+                const customerName = (order.customer && order.customer.name) || order.customerName || 'Customer';
+                const orderTotal = order.total || order.totalAmount || 0;
+                return `
                 <tr>
-                    <td><span class="order-code">${escapeHtml(order.id)}</span></td>
-                    <td><strong>${escapeHtml(order.customer.name)}</strong></td>
-                    <td><strong style="color: var(--color-charcoal); font-weight: 700;">${formatPrice(order.total)}</strong></td>
+                    <td><span class="order-code">${escapeHtml(order.id || order._id || 'N/A')}</span></td>
+                    <td><strong>${escapeHtml(customerName)}</strong></td>
+                    <td><strong style="color: var(--color-charcoal); font-weight: 700;">${formatPrice(orderTotal)}</strong></td>
                     <td>${getStatusBadge(order.status)}</td>
-                    <td style="color: var(--color-muted); font-size: 0.82rem;">${formatDate(order.date)}</td>
+                    <td style="color: var(--color-muted); font-size: 0.82rem;">${formatDate(order.date || order.createdAt)}</td>
                 </tr>
-            `).join('');
+            `;
+            }).join('');
         }
     }
 
     // Recent messages
-    const recentMessages = [...messages].sort((a, b) => new Date(b.date) - new Date(a.date)).slice(0, 4);
+    const recentMessages = [...messages].sort((a, b) => new Date(b.date || b.createdAt || 0) - new Date(a.date || a.createdAt || 0)).slice(0, 4);
     const recentMessagesList = document.getElementById('recent-messages-list');
     if (recentMessagesList) {
         if (recentMessages.length === 0) {
             recentMessagesList.innerHTML = '<div class="empty-state">No messages yet</div>';
         } else {
             recentMessagesList.innerHTML = recentMessages.map(msg => `
-                <div class="message-item" data-message-id="${msg.id}">
+                <div class="message-item" data-message-id="${msg.id || msg._id}">
                     <div class="message-item__name">
                         <span>${escapeHtml(msg.name)}</span>
-                        ${msg.status === 'new' ? '<span class="status-badge status-badge--new"><span class="status-dot"></span>NEW</span>' : ''}
+                        ${(msg.status === 'new' || msg.status === 'unread') ? '<span class="status-badge status-badge--new"><span class="status-dot"></span>NEW</span>' : ''}
                     </div>
-                    <div class="message-item__subject">${escapeHtml(msg.subject)}</div>
-                    <div class="message-item__date">${formatDate(msg.date)}</div>
+                    <div class="message-item__subject">${escapeHtml(msg.subject || msg.message || '')}</div>
+                    <div class="message-item__date">${formatDate(msg.date || msg.createdAt)}</div>
                 </div>
             `).join('');
 
@@ -235,4 +308,5 @@ function renderDashboard() {
 document.addEventListener('DOMContentLoaded', () => {
     initLayout('dashboard');
     renderDashboard();
+    loadDashboardData();
 });

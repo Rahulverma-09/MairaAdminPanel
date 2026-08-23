@@ -8,6 +8,15 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,600&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="../css/admin.css">
+    <script>
+        (function() {
+            var token = localStorage.getItem('maira_admin_token') || localStorage.getItem('token') || localStorage.getItem('admin_token');
+            var authFlag = localStorage.getItem('maira_admin_auth') === 'true';
+            if (!token && !authFlag) {
+                window.location.href = '../index.html';
+            }
+        })();
+    </script>
 </head>
 <body class="admin-body">
     <!-- Sidebar -->
@@ -31,6 +40,9 @@
             </a>
             <a href="orders.html" class="sidebar__link" data-section="orders">
                 <span class="sidebar__icon"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="21" r="1"/><circle cx="19" cy="21" r="1"/><path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"/></svg></span> Orders
+            </a>
+            <a href="customers.html" class="sidebar__link" data-section="customers">
+                <span class="sidebar__icon"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></span> Customers
             </a>
             <a href="payments.html" class="sidebar__link" data-section="payments">
                 <span class="sidebar__icon"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="14" x="2" y="5" rx="2"/><line x1="2" x2="22" y1="10" y2="10"/></svg></span> Payments
@@ -71,51 +83,18 @@
         <!-- Contact Management Section -->
         <section class="section active" id="section-contact">
             <div class="section__header">
-                <h2>Contact Management</h2>
-            </div>
-
-            <!-- Store Contact Info -->
-            <div class="card">
-                <div class="card__header">
-                    <h3>Store Contact Information</h3>
-                    <button class="btn btn--primary" id="edit-contact-info-btn">✏️ Edit Contact Info</button>
-                </div>
-                <div class="contact-info-grid" id="contact-info-display">
-                    <div class="contact-info-item">
-                        <span class="contact-info-item__icon">📍</span>
-                        <div>
-                            <h4>Address</h4>
-                            <p id="contact-address-display">Sandton City / Hyde Park, Johannesburg, South Africa</p>
-                        </div>
-                    </div>
-                    <div class="contact-info-item">
-                        <span class="contact-info-item__icon">🕐</span>
-                        <div>
-                            <h4>Store Hours</h4>
-                            <p id="contact-hours-display">Mon – Sat: 09:00 – 18:00 | Sun: 10:00 – 15:00</p>
-                        </div>
-                    </div>
-                    <div class="contact-info-item">
-                        <span class="contact-info-item__icon">📞</span>
-                        <div>
-                            <h4>Phone</h4>
-                            <p id="contact-phone-display">083 922 8383</p>
-                        </div>
-                    </div>
-                    <div class="contact-info-item">
-                        <span class="contact-info-item__icon">✉️</span>
-                        <div>
-                            <h4>Email</h4>
-                            <p id="contact-email-display">mairajewels.za@gmail.com</p>
-                        </div>
-                    </div>
-                </div>
+                <h2>Contact Inquiries</h2>
             </div>
 
             <!-- Contact Messages -->
             <div class="card">
-                <div class="card__header">
-                    <h3>Contact Messages</h3>
+                <div class="table-toolbar">
+                    <input type="text" id="contact-search" class="input input--search" placeholder="Search inquiries by name, email, subject, or message...">
+                    <select id="contact-status-filter" class="input input--select">
+                        <option value="all">All Inquiries</option>
+                        <option value="new">New Inquiries</option>
+                        <option value="read">Read / Handled</option>
+                    </select>
                 </div>
                 <div class="table-responsive">
                     <table class="table">
@@ -149,42 +128,11 @@
         </div>
     </div>
 
-    <!-- Contact Info Modal -->
-    <div class="modal-overlay" id="contact-info-modal">
-        <div class="modal">
-            <div class="modal__header">
-                <h3>Edit Contact Information</h3>
-                <button class="modal__close" data-close="contact-info-modal">&times;</button>
-            </div>
-            <form id="contact-info-form" class="modal__body">
-                <div class="form-group">
-                    <label for="contact-address">Address</label>
-                    <input type="text" id="contact-address" placeholder="Store address">
-                </div>
-                <div class="form-group">
-                    <label for="contact-hours">Store Hours</label>
-                    <input type="text" id="contact-hours" placeholder="Mon – Sat: 09:00 – 18:00">
-                </div>
-                <div class="form-group">
-                    <label for="contact-phone">Phone</label>
-                    <input type="text" id="contact-phone" placeholder="083 922 8383">
-                </div>
-                <div class="form-group">
-                    <label for="contact-email">Email</label>
-                    <input type="email" id="contact-email" placeholder="mairajewels.za@gmail.com">
-                </div>
-                <div class="modal__footer">
-                    <button type="button" class="btn btn--secondary" data-close="contact-info-modal">Cancel</button>
-                    <button type="submit" class="btn btn--primary">Save Contact Info</button>
-                </div>
-            </form>
-        </div>
-    </div>
-
     <!-- Toast Notification -->
     <div id="toast" class="toast"></div>
 
     <script src="../js/storage.js"></script>
+    <script src="../js/api.js"></script>
     <script src="../js/common.js"></script>
     <script src="../js/contact.js"></script>
 </body>

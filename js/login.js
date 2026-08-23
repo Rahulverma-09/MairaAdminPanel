@@ -1,28 +1,16 @@
 /* =============================================
-   Maira Jewels — Admin Login Logic
+   Maira Jewels — Admin Login Logic (Live API Direct Sync)
    ============================================= */
 
 (function () {
     'use strict';
 
     const AUTH_KEY = 'maira_admin_auth';
-    const CREDENTIALS_KEY = 'maira_admin_credentials';
-    const DEFAULT_CREDENTIALS = {
-        email: 'admin@mirajewels.com',
-        password: 'admin123'
-    };
 
-    function getCredentials() {
-        try {
-            const data = localStorage.getItem(CREDENTIALS_KEY);
-            return data ? JSON.parse(data) : DEFAULT_CREDENTIALS;
-        } catch (e) {
-            return DEFAULT_CREDENTIALS;
-        }
-    }
-
-    // If already authenticated, redirect to dashboard in html/ folder
-    if (localStorage.getItem(AUTH_KEY) === 'true') {
+    // If already authenticated with token, redirect to dashboard
+    const existingToken = localStorage.getItem('maira_admin_token') || localStorage.getItem('token') || localStorage.getItem('admin_token');
+    const isAuthFlag = localStorage.getItem(AUTH_KEY) === 'true';
+    if (existingToken || isAuthFlag) {
         window.location.href = 'html/dashboard.html';
         return;
     }
@@ -42,7 +30,7 @@
         }
     }
 
-    function handleLogin(e) {
+    async function handleLogin(e) {
         e.preventDefault();
         hideError();
 
@@ -54,13 +42,33 @@
             return;
         }
 
-        const creds = getCredentials();
+        const submitBtn = e.target.querySelector('button[type="submit"]');
+        const originalText = submitBtn ? submitBtn.textContent : 'LOG IN TO ADMIN';
+        if (submitBtn) {
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'LOGGING IN...';
+        }
 
-        if (email.toLowerCase() === creds.email.toLowerCase() && password === creds.password) {
-            localStorage.setItem(AUTH_KEY, 'true');
-            window.location.href = 'html/dashboard.html';
-        } else {
-            showError('Invalid email or password. Please try again.');
+        try {
+            if (typeof API === 'undefined' || !API.adminLogin) {
+                throw new Error('API client is not initialized. Please ensure backend is running.');
+            }
+
+            const res = await API.adminLogin(email, password);
+            if (res && (res.success || res.statusCode === 200 || res.data?.token)) {
+                localStorage.setItem(AUTH_KEY, 'true');
+                window.location.href = 'html/dashboard.html';
+                return;
+            } else {
+                throw new Error(res?.message || 'Login failed. Invalid credentials.');
+            }
+        } catch (err) {
+            console.error('[Login Error]:', err.message);
+            showError(err.message || 'Invalid email or password. Please verify backend connection.');
+            if (submitBtn) {
+                submitBtn.disabled = false;
+                submitBtn.textContent = originalText;
+            }
         }
     }
 

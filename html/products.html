@@ -8,6 +8,15 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,600&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="../css/admin.css">
+    <script>
+        (function() {
+            var token = localStorage.getItem('maira_admin_token') || localStorage.getItem('token') || localStorage.getItem('admin_token');
+            var authFlag = localStorage.getItem('maira_admin_auth') === 'true';
+            if (!token && !authFlag) {
+                window.location.href = '../index.html';
+            }
+        })();
+    </script>
 </head>
 <body class="admin-body">
     <!-- Sidebar -->
@@ -31,6 +40,9 @@
             </a>
             <a href="orders.html" class="sidebar__link" data-section="orders">
                 <span class="sidebar__icon"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="21" r="1"/><circle cx="19" cy="21" r="1"/><path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"/></svg></span> Orders
+            </a>
+            <a href="customers.html" class="sidebar__link" data-section="customers">
+                <span class="sidebar__icon"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></span> Customers
             </a>
             <a href="payments.html" class="sidebar__link" data-section="payments">
                 <span class="sidebar__icon"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="14" x="2" y="5" rx="2"/><line x1="2" x2="22" y1="10" y2="10"/></svg></span> Payments
@@ -65,7 +77,9 @@
                 <img src="../public/MairaLogo.png" alt="Maira Jewels" class="mobile-header__logo">
                 <span class="mobile-header__title">MAIRA JEWELS</span>
             </div>
-            <button class="mobile-menu-btn" id="sidebar-toggle" aria-label="Toggle Menu">☰</button>
+            <button class="mobile-menu-btn" id="sidebar-toggle" aria-label="Toggle Menu">
+                <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" x2="20" y1="12" y2="12"/><line x1="4" x2="20" y1="6" y2="6"/><line x1="4" x2="20" y1="18" y2="18"/></svg>
+            </button>
         </div>
 
         <!-- Products Section -->
@@ -76,23 +90,22 @@
             </div>
             <div class="card">
                 <div class="table-toolbar">
-                    <input type="text" id="product-search" class="input input--search" placeholder="Search products...">
+                    <input type="text" id="product-search" class="input input--search" placeholder="Search by name, ID, category, specifications...">
                     <select id="product-category-filter" class="input input--select">
                         <option value="all">All Categories</option>
                     </select>
                 </div>
                 <div class="table-responsive">
-                    <table class="table">
+                    <table class="table table--compact">
                         <thead>
                             <tr>
-                                <th>Image</th>
-                                <th>Name</th>
+                                <th style="width: 120px;">Product ID</th>
+                                <th>Product Details</th>
                                 <th>Category</th>
-                                <th>Price</th>
-                                <th>Metal</th>
-                                <th>Gem</th>
-                                <th>Badge</th>
-                                <th>Actions</th>
+                                <th style="text-align: right;">Price ($)</th>
+                                <th>Specifications</th>
+                                <th style="text-align: center;">Badge</th>
+                                <th style="text-align: center; width: 130px;">Actions</th>
                             </tr>
                         </thead>
                         <tbody id="products-table"></tbody>
@@ -103,62 +116,84 @@
         </section>
     </main>
 
-    <!-- Product Modal -->
+    <!-- Product Modal (Add / Edit) -->
     <div class="modal-overlay" id="product-modal">
-        <div class="modal">
-            <div class="modal__header">
-                <h3 id="product-modal-title">Add Product</h3>
-                <button class="modal__close" data-close="product-modal">&times;</button>
-            </div>
-            <form id="product-form" class="modal__body">
-                <input type="hidden" id="product-id">
-                <div class="form-grid">
-                    <div class="form-group">
-                        <label for="product-name">Product Name *</label>
-                        <input type="text" id="product-name" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="product-category">Category *</label>
-                        <select id="product-category" required></select>
-                    </div>
-                    <div class="form-group">
-                        <label for="product-price">Price ($) *</label>
-                        <input type="number" id="product-price" step="0.01" min="0" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="product-metal">Metal</label>
-                        <input type="text" id="product-metal" placeholder="18K Gold">
-                    </div>
-                    <div class="form-group">
-                        <label for="product-gem">Gem</label>
-                        <input type="text" id="product-gem" placeholder="Diamond">
-                    </div>
-                    <div class="form-group">
-                        <label for="product-badge">Badge</label>
-                        <select id="product-badge">
-                            <option value="">None</option>
-                            <option value="NEW">NEW</option>
-                            <option value="BESTSELLER">BESTSELLER</option>
-                            <option value="LIMITED">LIMITED</option>
-                            <option value="LUXURY">LUXURY</option>
-                        </select>
-                    </div>
-                    <div class="form-group form-group--full">
-                        <label for="product-specs">Specifications</label>
-                        <input type="text" id="product-specs" placeholder="18K White Gold · 1.5 Carat Diamond">
-                    </div>
-                    <div class="form-group form-group--full">
-                        <label for="product-image">Image URL</label>
-                        <input type="url" id="product-image" placeholder="https://...">
-                    </div>
-                    <div class="form-group form-group--full">
-                        <label for="product-thumbs">Thumbnail URLs (comma separated)</label>
-                        <textarea id="product-thumbs" rows="2" placeholder="https://..., https://..."></textarea>
+        <div class="modal modal--wide">
+            <form id="product-form" class="modal__form-wrapper">
+                <div class="modal__header">
+                    <h3 id="product-modal-title">Add Product</h3>
+                    <button type="button" class="modal__close" data-close="product-modal">&times;</button>
+                </div>
+                <div class="modal__body">
+                    <input type="hidden" id="product-id">
+                    <div class="form-grid">
+                        <div class="form-group form-group--full">
+                            <label for="product-name">Product Name *</label>
+                            <input type="text" id="product-name" placeholder="e.g. Eternal Solitaire Ring" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="product-category">Category *</label>
+                            <select id="product-category" required></select>
+                        </div>
+                        <div class="form-group">
+                            <label for="product-price">Price in USD ($) *</label>
+                            <input type="number" id="product-price" step="0.01" min="0" placeholder="e.g. 2450.00" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="product-badge">Badge</label>
+                            <select id="product-badge">
+                                <option value="">None</option>
+                                <option value="NEW">NEW</option>
+                                <option value="MOST POPULAR">MOST POPULAR</option>
+                                <option value="LIMITED">LIMITED</option>
+                                <option value="LUXURY">LUXURY</option>
+                            </select>
+                        </div>
+                        <div class="form-group form-group--full">
+                            <label for="product-description">Product Description</label>
+                            <textarea id="product-description" rows="3" placeholder="Write a luxurious, compelling overview of this piece..."></textarea>
+                        </div>
+                        <div class="form-group form-group--full">
+                            <label for="product-specs-input">Specifications (Badges / Tags)</label>
+                            <div class="specs-input-wrapper">
+                                <input type="text" id="product-specs-input" placeholder="Type a specification & press Enter (e.g. 18K White Gold, 1.5 Carat Diamond, VVS1, Weight: 5.2g)">
+                                <button type="button" class="btn btn--secondary btn--sm" id="btn-add-spec">Add Badge</button>
+                            </div>
+                            <input type="hidden" id="product-specs">
+                            <div class="specs-badges-container" id="specs-badges-list"></div>
+                            <small style="color: var(--color-muted); font-size: 0.73rem; margin-top: 3px; display: block;">Separate specs with commas or press Enter. Each specification renders as a luxury badge tag on the site.</small>
+                        </div>
+                        <div class="form-group form-group--full">
+                            <label for="product-details">Product Details</label>
+                            <textarea id="product-details" rows="3" placeholder="Detailed craftsmanship, stone setting, metal purity, certification notes..."></textarea>
+                        </div>
+
+                        <!-- Multi-Image Upload Section -->
+                        <div class="form-group form-group--full">
+                            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.4rem;">
+                                <label style="margin-bottom: 0;">Product Images (Multiple Images Supported)</label>
+                                <button type="button" class="btn btn--secondary btn--sm" id="btn-trigger-upload">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 4px;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" x2="12" y1="3" y2="15"/></svg>
+                                    Upload Images
+                                </button>
+                            </div>
+                            <div class="image-upload-zone" id="image-upload-dropzone">
+                                <input type="file" id="product-file-input" multiple accept="image/*" style="display: none;">
+                                <div class="image-upload-zone__icon">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/></svg>
+                                </div>
+                                <div class="image-upload-zone__text">Click or drag & drop to upload multiple images</div>
+                                <div class="image-upload-zone__subtext">Supports PNG, JPG, WEBP (Select multiple images at once)</div>
+                            </div>
+
+                            <!-- Previews Grid -->
+                            <div class="image-previews-grid" id="image-previews-container"></div>
+                        </div>
                     </div>
                 </div>
                 <div class="modal__footer">
                     <button type="button" class="btn btn--secondary" data-close="product-modal">Cancel</button>
-                    <button type="submit" class="btn btn--primary">Save Product</button>
+                    <button type="submit" class="btn btn--primary" id="btn-save-product">Save Product</button>
                 </div>
             </form>
         </div>
@@ -168,7 +203,9 @@
     <div id="toast" class="toast"></div>
 
     <script src="../js/storage.js"></script>
+    <script src="../js/api.js"></script>
     <script src="../js/common.js"></script>
     <script src="../js/products.js"></script>
 </body>
 </html>
+

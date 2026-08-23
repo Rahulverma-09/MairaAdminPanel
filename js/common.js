@@ -4,16 +4,26 @@
 
 // ============ AUTH ============
 function isAuthenticated() {
-    return localStorage.getItem(STORAGE_KEYS.AUTH) === 'true';
+    const token = localStorage.getItem('maira_admin_token') || localStorage.getItem('token') || localStorage.getItem('admin_token');
+    const authFlag = localStorage.getItem(typeof STORAGE_KEYS !== 'undefined' ? STORAGE_KEYS.AUTH : 'maira_admin_auth') === 'true';
+    return !!(token || authFlag);
 }
 
 function requireAuth() {
     if (!isAuthenticated()) {
-        window.location.href = '../index.html';
+        const isSubDir = window.location.pathname.includes('/html/');
+        window.location.href = isSubDir ? '../index.html' : 'index.html';
         return false;
     }
     return true;
 }
+
+// Immediate route guard for all admin html sub-pages
+(function enforceRouteGuard() {
+    if (window.location.pathname.includes('/html/')) {
+        requireAuth();
+    }
+})();
 
 // ============ FORMATTING & UTILITIES ============
 function formatPrice(val) {
@@ -27,15 +37,96 @@ function formatDate(dateStr) {
     return d.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
 }
 
+function formatAddress(addr) {
+    if (!addr) return '—';
+    if (typeof addr === 'string') return addr.trim() || '—';
+    if (typeof addr === 'object') {
+        const street = addr.street || addr.line1 || addr.addressLine1 || addr.address || addr.streetAddress || '';
+        const city = addr.city || '';
+        const state = addr.state || '';
+        const pin = addr.pincode || addr.zip || addr.postalCode || '';
+        const country = addr.country || '';
+        const parts = [street, city, state, pin, country].filter(Boolean);
+        return parts.length > 0 ? parts.join(', ') : '—';
+    }
+    return String(addr);
+}
+
 function escapeHtml(str) {
-    if (!str) return '';
+    if (str === null || str === undefined) return '';
+    if (typeof str === 'object') {
+        return escapeHtml(formatAddress(str));
+    }
     const div = document.createElement('div');
-    div.textContent = str;
+    div.textContent = String(str);
     return div.innerHTML;
 }
 
 function generateId(prefix) {
     return prefix + '-' + Date.now().toString(36) + Math.random().toString(36).substr(2, 5);
+}
+
+function isMongoId(str) {
+    if (!str || typeof str !== 'string') return false;
+    return /^[0-9a-fA-F]{24}$/.test(str.trim());
+}
+
+function generateProductId(name, idx) {
+    let clean = (name || '').replace(/[^a-zA-Z]/g, '').toUpperCase();
+    if (clean.length < 3) {
+        clean = (clean + 'PRD').substring(0, 3);
+    } else {
+        clean = clean.substring(0, 3);
+    }
+    if (idx) {
+        return `${clean}-${String(100 + Number(idx)).padStart(3, '0')}`;
+    }
+    const randNum = Math.floor(100 + Math.random() * 900);
+    return `${clean}-${randNum}`;
+}
+
+function getProductDisplayId(product, index = 0) {
+    if (!product) return `PRD-${String(index + 1).padStart(3, '0')}`;
+    let candidate = product.productId || product.code;
+    if (candidate && !isMongoId(candidate)) {
+        return candidate;
+    }
+    if (product.id && !isMongoId(product.id)) {
+        return product.id;
+    }
+    const autogen = generateProductId(product.name || 'Product', index + 1);
+    product.productId = autogen;
+    product.code = autogen;
+    return autogen;
+}
+
+function generateCategoryId(name, idx) {
+    let clean = (name || '').replace(/[^a-zA-Z]/g, '').toUpperCase();
+    if (clean.length < 3) {
+        clean = (clean + 'CAT').substring(0, 3);
+    } else {
+        clean = clean.substring(0, 3);
+    }
+    if (idx) {
+        return `CAT-${clean}-${String(100 + Number(idx)).padStart(3, '0')}`;
+    }
+    const randNum = Math.floor(1000 + Math.random() * 9000);
+    return `CAT-${clean}-${randNum}`;
+}
+
+function getCategoryDisplayId(category, index = 0) {
+    if (!category) return `CAT-${String(index + 1).padStart(3, '0')}`;
+    let candidate = category.categoryId || category.code;
+    if (candidate && !isMongoId(candidate)) {
+        return candidate;
+    }
+    if (category.id && !isMongoId(category.id)) {
+        return category.id;
+    }
+    const autogen = generateCategoryId(category.name || 'Category', index + 1);
+    category.categoryId = autogen;
+    category.code = autogen;
+    return autogen;
 }
 
 function getStatusBadge(status) {
@@ -185,8 +276,16 @@ function initLayout(activeSection) {
     const logoutBtn = document.getElementById('logout-btn');
     if (logoutBtn) {
         logoutBtn.addEventListener('click', () => {
-            localStorage.removeItem(STORAGE_KEYS.AUTH);
-            window.location.href = '../index.html';
+            if (typeof API !== 'undefined' && API.setToken) {
+                API.setToken(null);
+            } else {
+                localStorage.removeItem('maira_admin_token');
+                localStorage.removeItem('token');
+                localStorage.removeItem('admin_token');
+                localStorage.removeItem('maira_admin_auth');
+            }
+            const isSubDir = window.location.pathname.includes('/html/');
+            window.location.href = isSubDir ? '../index.html' : 'index.html';
         });
     }
 

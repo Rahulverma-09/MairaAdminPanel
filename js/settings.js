@@ -1,23 +1,34 @@
 /**
- * Maira Jewels Admin - Settings Controller
+ * Maira Jewels Admin - Settings Controller (Live API Direct Sync)
  */
 
-function loadProfile() {
-    const profile = Storage.getProfile();
-    const creds = Storage.getCredentials();
+async function loadProfile() {
+    let profile = Storage.getProfile();
+
+    try {
+        if (typeof API !== 'undefined' && API.getProfile) {
+            const res = await API.getProfile();
+            if (res && res.data) {
+                profile = res.data.user || res.data;
+                Storage.saveProfile(profile);
+            }
+        }
+    } catch (e) {
+        console.warn('[Settings] Profile fetch error, using cache:', e.message);
+    }
 
     const nameInput = document.getElementById('profile-name');
     const emailInput = document.getElementById('profile-email');
     const roleInput = document.getElementById('profile-role');
     const avatarInput = document.getElementById('profile-avatar');
 
-    if (nameInput) nameInput.value = profile.name || 'Admin';
-    if (emailInput) emailInput.value = creds.email || profile.email || 'admin@mirajewels.com';
+    if (nameInput) nameInput.value = profile.name || '';
+    if (emailInput) emailInput.value = profile.email || '';
     if (roleInput) roleInput.value = profile.role || 'Administrator';
-    if (avatarInput) avatarInput.value = profile.avatar || 'A';
+    if (avatarInput) avatarInput.value = profile.avatar || (profile.name ? profile.name.charAt(0).toUpperCase() : 'A');
 }
 
-function handleProfileUpdate(e) {
+async function handleProfileUpdate(e) {
     e.preventDefault();
 
     const name = document.getElementById('profile-name').value.trim();
@@ -30,14 +41,21 @@ function handleProfileUpdate(e) {
         return;
     }
 
-    // Save profile
-    const profile = { name, email, role, avatar };
-    Storage.saveProfile(profile);
+    const profileData = { name, email, role, avatar };
 
-    // Sync credentials email
-    const creds = Storage.getCredentials();
-    creds.email = email;
-    Storage.saveCredentials(creds);
+    try {
+        if (typeof API !== 'undefined' && API.updateProfile) {
+            const res = await API.updateProfile(profileData);
+            if (res && res.data) {
+                profileData.name = res.data.name || name;
+                profileData.email = res.data.email || email;
+            }
+        }
+    } catch (err) {
+        console.warn('[Settings] Profile API update warning:', err.message);
+    }
+
+    Storage.saveProfile(profileData);
 
     // Update sidebar profile live
     const adminName = document.getElementById('admin-name');
@@ -50,17 +68,15 @@ function handleProfileUpdate(e) {
     showToast('Profile updated successfully!', 'success');
 }
 
-function handlePasswordUpdate(e) {
+async function handlePasswordUpdate(e) {
     e.preventDefault();
 
     const currentPass = document.getElementById('current-password').value;
     const newPass = document.getElementById('new-password').value;
     const confirmPass = document.getElementById('confirm-password').value;
 
-    const creds = Storage.getCredentials();
-
-    if (currentPass !== creds.password) {
-        showToast('Current password is incorrect', 'error');
+    if (!currentPass || !newPass) {
+        showToast('Please enter both current and new password', 'error');
         return;
     }
 
@@ -74,11 +90,16 @@ function handlePasswordUpdate(e) {
         return;
     }
 
-    creds.password = newPass;
-    Storage.saveCredentials(creds);
-
-    document.getElementById('password-form').reset();
-    showToast('Password changed successfully!', 'success');
+    try {
+        if (typeof API !== 'undefined' && API.updatePassword) {
+            await API.updatePassword({ currentPassword: currentPass, newPassword: newPass });
+        }
+        document.getElementById('password-form').reset();
+        showToast('Password changed successfully!', 'success');
+    } catch (err) {
+        console.error('[Settings] Password update error:', err.message);
+        showToast('Failed to update password: ' + err.message, 'error');
+    }
 }
 
 document.addEventListener('DOMContentLoaded', () => {

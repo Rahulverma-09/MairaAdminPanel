@@ -8,6 +8,15 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,600&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="../css/admin.css">
+    <script>
+        (function() {
+            var token = localStorage.getItem('maira_admin_token') || localStorage.getItem('token') || localStorage.getItem('admin_token');
+            var authFlag = localStorage.getItem('maira_admin_auth') === 'true';
+            if (!token && !authFlag) {
+                window.location.href = '../index.html';
+            }
+        })();
+    </script>
 </head>
 <body class="admin-body">
     <!-- Sidebar -->
@@ -31,6 +40,9 @@
             </a>
             <a href="orders.html" class="sidebar__link" data-section="orders">
                 <span class="sidebar__icon"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="21" r="1"/><circle cx="19" cy="21" r="1"/><path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"/></svg></span> Orders
+            </a>
+            <a href="customers.html" class="sidebar__link" data-section="customers">
+                <span class="sidebar__icon"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></span> Customers
             </a>
             <a href="payments.html" class="sidebar__link" data-section="payments">
                 <span class="sidebar__icon"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="14" x="2" y="5" rx="2"/><line x1="2" x2="22" y1="10" y2="10"/></svg></span> Payments
@@ -75,14 +87,19 @@
                 <button class="btn btn--primary" id="add-category-btn">+ Add Category</button>
             </div>
             <div class="card">
+                <div class="table-toolbar">
+                    <input type="text" id="category-search" class="input input--search" placeholder="Search categories by name, ID, description...">
+                </div>
                 <div class="table-responsive">
-                    <table class="table">
+                    <table class="table table--compact">
                         <thead>
                             <tr>
+                                <th style="width: 60px; text-align: center;">Image</th>
+                                <th style="width: 130px;">Category ID</th>
                                 <th>Name</th>
                                 <th>Description</th>
-                                <th>Products</th>
-                                <th>Actions</th>
+                                <th style="text-align: center;">Products</th>
+                                <th style="text-align: center; width: 140px;">Actions</th>
                             </tr>
                         </thead>
                         <tbody id="categories-table"></tbody>
@@ -104,11 +121,34 @@
                 <input type="hidden" id="category-id">
                 <div class="form-group">
                     <label for="category-name">Category Name *</label>
-                    <input type="text" id="category-name" required>
+                    <input type="text" id="category-name" placeholder="e.g. Diamond Rings" required>
                 </div>
                 <div class="form-group">
                     <label for="category-description">Description</label>
-                    <textarea id="category-description" rows="3"></textarea>
+                    <textarea id="category-description" rows="3" placeholder="Brief, elegant summary of pieces in this collection..."></textarea>
+                </div>
+                <div class="form-group">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.35rem;">
+                        <label style="margin-bottom: 0;">Category Image</label>
+                        <button type="button" class="btn btn--sm btn--secondary" id="btn-trigger-category-upload" style="padding: 2px 8px; font-size: 0.75rem;">
+                            Upload Image
+                        </button>
+                    </div>
+                    <div class="image-upload-zone" id="category-upload-dropzone" style="padding: 1.25rem; text-align: center; border: 2px dashed #d5cbbe; border-radius: 8px; cursor: pointer; background: #faf8f5;">
+                        <input type="file" id="category-file-input" accept="image/*" style="display: none;">
+                        <div class="image-upload-zone__icon" style="color: #bfa15f; margin-bottom: 0.35rem;">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/></svg>
+                        </div>
+                        <div class="image-upload-zone__text" style="font-size: 0.85rem; font-weight: 500; color: #2c2523;">Click or drag & drop category banner image</div>
+                        <div class="image-upload-zone__subtext" style="font-size: 0.75rem; color: #8c827a;">Supports PNG, JPG, WEBP</div>
+                    </div>
+                    <!-- Image Preview Container -->
+                    <div id="category-image-preview-container" style="margin-top: 0.75rem; display: none;">
+                        <div style="position: relative; width: 100%; height: 140px; border-radius: 8px; overflow: hidden; border: 1px solid #e0d8cc;">
+                            <img id="category-image-preview" src="" alt="Category preview" style="width: 100%; height: 100%; object-fit: cover;">
+                            <button type="button" id="btn-remove-category-image" style="position: absolute; top: 6px; right: 6px; background: rgba(0,0,0,0.65); color: #fff; border: none; border-radius: 50%; width: 24px; height: 24px; cursor: pointer; font-size: 14px; line-height: 24px; text-align: center;">&times;</button>
+                        </div>
+                    </div>
                 </div>
                 <div class="modal__footer">
                     <button type="button" class="btn btn--secondary" data-close="category-modal">Cancel</button>
@@ -122,6 +162,7 @@
     <div id="toast" class="toast"></div>
 
     <script src="../js/storage.js"></script>
+    <script src="../js/api.js"></script>
     <script src="../js/common.js"></script>
     <script src="../js/categories.js"></script>
 </body>
