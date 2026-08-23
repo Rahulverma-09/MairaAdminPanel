@@ -1,9 +1,9 @@
 /**
  * Maira Jewels Admin - Backend API Client & Seamless Sync Layer
- * Interfacing directly with http://localhost:5000/api/v1
+ * Interfacing directly with https://maira-backend-mngd.onrender.com/api/v1
  */
 
-const API_BASE_URL = 'http://localhost:5000/api/v1';
+const API_BASE_URL = 'https://maira-backend-mngd.onrender.com/api/v1';
 
 const API = {
     getToken: function () {
