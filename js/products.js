@@ -298,7 +298,7 @@ function openProductModal(product) {
     const descTextarea = document.getElementById('product-description');
 
     if (isEdit) {
-        const prodId = product.id || product._id || '';
+        const prodId = product._id || product.id || '';
         idInput.value = prodId;
         nameInput.value = product.name || '';
         catSelect.value = product.category || '';
@@ -340,9 +340,11 @@ function editProduct(id) {
 
 async function deleteProduct(id) {
     if (!confirm('Are you sure you want to delete this product?')) return;
+    const targetProduct = productsList.find(p => p.id === id || p._id === id);
+    const dbId = (targetProduct && targetProduct._id) ? targetProduct._id : id;
     try {
         if (typeof API !== 'undefined' && API.deleteProduct) {
-            await API.deleteProduct(id);
+            await API.deleteProduct(dbId);
         }
         productsList = productsList.filter(p => p.id !== id && p._id !== id);
         Storage.saveProducts(productsList);
@@ -409,8 +411,10 @@ async function handleProductForm(e) {
     let savedProduct = productData;
     try {
         if (typeof API !== 'undefined') {
+            const targetProduct = productsList.find(p => p.id === id || p._id === id);
+            const dbId = (targetProduct && targetProduct._id) ? targetProduct._id : id;
             if (isEdit && API.updateProduct) {
-                const apiRes = await API.updateProduct(id, productData);
+                const apiRes = await API.updateProduct(dbId, productData);
                 if (apiRes && apiRes.data) {
                     savedProduct = apiRes.data.product || apiRes.data;
                 }

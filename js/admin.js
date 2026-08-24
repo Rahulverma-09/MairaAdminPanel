@@ -47,7 +47,29 @@
     }
 
     function saveData(key, data) {
-        localStorage.setItem(key, JSON.stringify(data));
+        try {
+            localStorage.setItem(key, JSON.stringify(data));
+        } catch (e) {
+            console.warn(`[Storage] Quota exceeded or error saving '${key}' to localStorage:`, e);
+            if (Array.isArray(data)) {
+                try {
+                    const sanitized = data.map(item => {
+                        if (!item || typeof item !== 'object') return item;
+                        const copy = { ...item };
+                        if (typeof copy.image === 'string' && copy.image.startsWith('data:')) {
+                            delete copy.image;
+                        }
+                        if (Array.isArray(copy.images)) {
+                            copy.images = copy.images.filter(img => typeof img === 'string' && !img.startsWith('data:'));
+                        }
+                        return copy;
+                    });
+                    localStorage.setItem(key, JSON.stringify(sanitized));
+                } catch (retryErr) {
+                    console.warn(`[Storage] Fallback save failed for '${key}':`, retryErr);
+                }
+            }
+        }
     }
 
     // ============ DATA ACCESS ============

@@ -284,10 +284,24 @@ const API = {
     },
 
     updateProfile: async function (profileData) {
-        return await this.request('/auth/profile', {
-            method: 'PUT',
-            body: JSON.stringify(profileData)
-        });
+        try {
+            return await this.request('/auth/profile', {
+                method: 'PUT',
+                body: JSON.stringify(profileData)
+            });
+        } catch (e1) {
+            try {
+                return await this.request('/auth/me', {
+                    method: 'PUT',
+                    body: JSON.stringify(profileData)
+                });
+            } catch (e2) {
+                return await this.request('/users/profile', {
+                    method: 'PUT',
+                    body: JSON.stringify(profileData)
+                });
+            }
+        }
     },
 
     updatePassword: async function (passwordData) {

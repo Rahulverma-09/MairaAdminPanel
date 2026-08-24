@@ -56,6 +56,11 @@ async function handleProfileUpdate(e) {
     }
 
     Storage.saveProfile(profileData);
+    if (typeof Storage !== 'undefined' && Storage.saveCredentials) {
+        const creds = (Storage.getCredentials && Storage.getCredentials()) || {};
+        creds.email = email;
+        Storage.saveCredentials(creds);
+    }
 
     // Update sidebar profile live
     const adminName = document.getElementById('admin-name');
