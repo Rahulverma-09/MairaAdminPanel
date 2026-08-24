@@ -50,23 +50,32 @@
         try {
             localStorage.setItem(key, JSON.stringify(data));
         } catch (e) {
-            console.warn(`[Storage] Quota exceeded or error saving '${key}' to localStorage:`, e);
-            if (Array.isArray(data)) {
-                try {
-                    const sanitized = data.map(item => {
+            try {
+                if (Array.isArray(data)) {
+                    const fallbackImg = 'https://images.unsplash.com/photo-1535632066927-ab7c9ab60908?auto=format&fit=crop&w=800&q=80';
+                    const lightData = data.map(item => {
                         if (!item || typeof item !== 'object') return item;
                         const copy = { ...item };
                         if (typeof copy.image === 'string' && copy.image.startsWith('data:')) {
-                            delete copy.image;
+                            copy.image = fallbackImg;
                         }
                         if (Array.isArray(copy.images)) {
-                            copy.images = copy.images.filter(img => typeof img === 'string' && !img.startsWith('data:'));
+                            copy.images = copy.images.map(img => (typeof img === 'string' && img.startsWith('data:')) ? fallbackImg : img);
+                        }
+                        if (Array.isArray(copy.thumbs)) {
+                            copy.thumbs = copy.thumbs.map(img => (typeof img === 'string' && img.startsWith('data:')) ? fallbackImg : img);
                         }
                         return copy;
                     });
-                    localStorage.setItem(key, JSON.stringify(sanitized));
-                } catch (retryErr) {
-                    console.warn(`[Storage] Fallback save failed for '${key}':`, retryErr);
+                    localStorage.setItem(key, JSON.stringify(lightData));
+                }
+            } catch (retryErr) {
+                try {
+                    if (Array.isArray(data)) {
+                        localStorage.setItem(key, JSON.stringify(data.slice(0, 20)));
+                    }
+                } catch (finalErr) {
+                    // Silently catch quota limits
                 }
             }
         }
@@ -331,7 +340,7 @@
             btn.addEventListener('click', () => editProduct(btn.dataset.editProduct));
         });
         tbody.querySelectorAll('[data-delete-product]').forEach(btn => {
-            btn.addEventListener('click', () => deleteProduct(btn.dataset.deleteProduct));
+            btn.addEventListener('click', () => deleteProduct(btn.dataset.deleteProduct, btn));
         });
     }
 
@@ -355,13 +364,15 @@
         if (product) openProductModal(product);
     }
 
-    function deleteProduct(id) {
+    function deleteProduct(id, btnElement) {
         if (!confirm('Are you sure you want to delete this product?')) return;
+        if (btnElement) setButtonLoading(btnElement, true, 'Deleting...');
         const products = getProducts().filter(p => p.id !== id);
         saveProducts(products);
         renderProducts();
         renderDashboard();
         showToast('Product deleted successfully', 'success');
+        if (btnElement) setButtonLoading(btnElement, false);
     }
 
     function handleProductForm(e) {
@@ -448,7 +459,7 @@
             btn.addEventListener('click', () => editCategory(btn.dataset.editCategory));
         });
         tbody.querySelectorAll('[data-delete-category]').forEach(btn => {
-            btn.addEventListener('click', () => deleteCategory(btn.dataset.deleteCategory));
+            btn.addEventListener('click', () => deleteCategory(btn.dataset.deleteCategory, btn));
         });
     }
 
@@ -465,7 +476,7 @@
         if (category) openCategoryModal(category);
     }
 
-    function deleteCategory(id) {
+    function deleteCategory(id, btnElement) {
         const category = getCategories().find(c => c.id === id);
         if (!category) return;
         const productCount = getProducts().filter(p => p.category === category.name).length;
@@ -474,11 +485,13 @@
         } else {
             if (!confirm('Are you sure you want to delete this category?')) return;
         }
+        if (btnElement) setButtonLoading(btnElement, true, 'Deleting...');
         const categories = getCategories().filter(c => c.id !== id);
         saveCategories(categories);
         renderCategories();
         renderDashboard();
         showToast('Category deleted successfully', 'success');
+        if (btnElement) setButtonLoading(btnElement, false);
     }
 
     function handleCategoryForm(e) {

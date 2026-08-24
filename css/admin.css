@@ -166,6 +166,29 @@ body {
     line-height: 1.2;
 }
 
+.btn:disabled, .btn[disabled], .btn.disabled {
+    opacity: 0.65;
+    cursor: not-allowed !important;
+    pointer-events: none !important;
+    transform: none !important;
+    box-shadow: none !important;
+}
+
+.btn-spinner {
+    display: inline-block;
+    width: 13px;
+    height: 13px;
+    border: 2px solid currentColor;
+    border-right-color: transparent;
+    border-radius: 50%;
+    animation: btn-spin 0.55s linear infinite;
+    vertical-align: middle;
+}
+
+@keyframes btn-spin {
+    to { transform: rotate(360deg); }
+}
+
 .btn--primary {
     background: linear-gradient(135deg, #c9a96e 0%, #a8894f 100%);
     color: var(--color-white);

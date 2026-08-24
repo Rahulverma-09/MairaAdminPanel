@@ -135,6 +135,28 @@ function getStatusBadge(status) {
     return `<span class="${cls}"><span class="status-dot"></span>${escapeHtml(status || 'N/A')}</span>`;
 }
 
+// ============ BUTTON LOADING STATE ============
+function setButtonLoading(btn, isLoading, loadingText = '') {
+    if (!btn) return;
+    if (isLoading) {
+        btn.disabled = true;
+        btn.classList.add('disabled');
+        if (!btn.dataset.originalHtml) {
+            btn.dataset.originalHtml = btn.innerHTML;
+        }
+        const spinner = `<span class="btn-spinner"></span>`;
+        const text = loadingText ? escapeHtml(loadingText) : btn.textContent.trim();
+        btn.innerHTML = `${spinner} ${text}`;
+    } else {
+        btn.disabled = false;
+        btn.classList.remove('disabled');
+        if (btn.dataset.originalHtml) {
+            btn.innerHTML = btn.dataset.originalHtml;
+            delete btn.dataset.originalHtml;
+        }
+    }
+}
+
 // ============ TOAST NOTIFICATIONS ============
 function showToast(msg, type) {
     let toast = document.getElementById('toast');

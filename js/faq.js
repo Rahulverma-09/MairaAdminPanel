@@ -137,7 +137,7 @@ function renderFaqs() {
         btn.addEventListener('click', () => toggleFaqApproval(btn.dataset.toggleApprove));
     });
     tbody.querySelectorAll('[data-delete-faq]').forEach(btn => {
-        btn.addEventListener('click', () => deleteFaq(btn.dataset.deleteFaq));
+        btn.addEventListener('click', () => deleteFaq(btn.dataset.deleteFaq, btn));
     });
 }
 
@@ -177,12 +177,17 @@ async function handleFaqReplyForm(e) {
         return;
     }
 
+    const submitBtn = e.target.querySelector('button[type="submit"]');
+    if (submitBtn) setButtonLoading(submitBtn, true, 'Publishing...');
+
     try {
         if (typeof API !== 'undefined' && API.replyFaq) {
             await API.replyFaq(id, answer, approve);
         }
     } catch (apiErr) {
         console.warn('API reply error:', apiErr);
+    } finally {
+        if (submitBtn) setButtonLoading(submitBtn, false);
     }
 
     const faq = faqsList.find(f => f.id === id || f._id === id);
@@ -221,14 +226,19 @@ async function toggleFaqApproval(id) {
     showToast(newApproved ? 'FAQ approved for live website view' : 'FAQ hidden from website', 'success');
 }
 
-async function deleteFaq(id) {
+async function deleteFaq(id, btnElement) {
     if (!confirm('Are you sure you want to delete this FAQ?')) return;
+    if (btnElement) setButtonLoading(btnElement, true, 'Deleting...');
+    const faq = faqsList.find(f => f.id === id || f._id === id);
+    const dbId = (faq && faq._id) ? faq._id : id;
     try {
         if (typeof API !== 'undefined' && API.deleteFaq) {
-            await API.deleteFaq(id);
+            await API.deleteFaq(dbId);
         }
     } catch (e) {
         console.warn('API delete FAQ error:', e);
+    } finally {
+        if (btnElement) setButtonLoading(btnElement, false);
     }
     faqsList = faqsList.filter(f => f.id !== id && f._id !== id);
     Storage.saveFaqs(faqsList);
@@ -250,6 +260,9 @@ async function handleFaqForm(e) {
         return;
     }
 
+    const submitBtn = e.target.querySelector('button[type="submit"]');
+    if (submitBtn) setButtonLoading(submitBtn, true, isEdit ? 'Saving...' : 'Creating...');
+
     let faqId = idInput;
     if (!faqId) {
         faqId = generateId('FAQ');
@@ -266,14 +279,18 @@ async function handleFaqForm(e) {
 
     try {
         if (typeof API !== 'undefined') {
+            const targetFaq = faqsList.find(f => f.id === faqId || f._id === faqId);
+            const dbId = (targetFaq && targetFaq._id) ? targetFaq._id : faqId;
             if (isEdit && API.updateFaq) {
-                await API.updateFaq(faqId, faqData);
+                await API.updateFaq(dbId, faqData);
             } else if (!isEdit && API.createFaq) {
                 await API.createFaq(faqData);
             }
         }
     } catch (apiErr) {
         console.warn('API FAQ sync warning:', apiErr);
+    } finally {
+        if (submitBtn) setButtonLoading(submitBtn, false);
     }
 
     if (isEdit) {

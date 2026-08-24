@@ -207,7 +207,7 @@ function renderProducts() {
         btn.addEventListener('click', () => editProduct(btn.dataset.editProduct));
     });
     tbody.querySelectorAll('[data-delete-product]').forEach(btn => {
-        btn.addEventListener('click', () => deleteProduct(btn.dataset.deleteProduct));
+        btn.addEventListener('click', () => deleteProduct(btn.dataset.deleteProduct, btn));
     });
 }
 
@@ -338,10 +338,11 @@ function editProduct(id) {
     if (product) openProductModal(product);
 }
 
-async function deleteProduct(id) {
+async function deleteProduct(id, btnElement) {
     if (!confirm('Are you sure you want to delete this product?')) return;
     const targetProduct = productsList.find(p => p.id === id || p._id === id);
     const dbId = (targetProduct && targetProduct._id) ? targetProduct._id : id;
+    if (btnElement) setButtonLoading(btnElement, true, 'Deleting...');
     try {
         if (typeof API !== 'undefined' && API.deleteProduct) {
             await API.deleteProduct(dbId);
@@ -353,6 +354,8 @@ async function deleteProduct(id) {
     } catch (e) {
         console.error('API delete error:', e);
         showToast('Failed to delete product: ' + e.message, 'error');
+    } finally {
+        if (btnElement) setButtonLoading(btnElement, false);
     }
 }
 
@@ -380,6 +383,9 @@ async function handleProductForm(e) {
         showToast('Please fill in all required fields with valid values', 'error');
         return;
     }
+
+    const submitBtn = e.target.querySelector('button[type="submit"]');
+    if (submitBtn) setButtonLoading(submitBtn, true, isEdit ? 'Saving...' : 'Adding...');
 
     // Auto-generate Product ID if new
     const autogenCode = generateProductId(name);
@@ -428,9 +434,11 @@ async function handleProductForm(e) {
     } catch (apiErr) {
         console.error('API product sync error:', apiErr);
         showToast('Failed to save product: ' + apiErr.message, 'error');
+        if (submitBtn) setButtonLoading(submitBtn, false);
         return;
     }
 
+    if (submitBtn) setButtonLoading(submitBtn, false);
     closeModal('product-modal');
     showToast(isEdit ? 'Product updated successfully' : `Product ${savedProduct.name || productData.name} added successfully`, 'success');
     await loadProductsData();

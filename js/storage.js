@@ -61,23 +61,32 @@ const Storage = {
         try {
             localStorage.setItem(key, JSON.stringify(data));
         } catch (e) {
-            console.warn(`[Storage] Quota exceeded or error saving '${key}' to localStorage:`, e);
-            if (Array.isArray(data)) {
-                try {
-                    const sanitized = data.map(item => {
+            try {
+                if (Array.isArray(data)) {
+                    const fallbackImg = 'https://images.unsplash.com/photo-1535632066927-ab7c9ab60908?auto=format&fit=crop&w=800&q=80';
+                    const lightData = data.map(item => {
                         if (!item || typeof item !== 'object') return item;
                         const copy = { ...item };
                         if (typeof copy.image === 'string' && copy.image.startsWith('data:')) {
-                            delete copy.image;
+                            copy.image = fallbackImg;
                         }
                         if (Array.isArray(copy.images)) {
-                            copy.images = copy.images.filter(img => typeof img === 'string' && !img.startsWith('data:'));
+                            copy.images = copy.images.map(img => (typeof img === 'string' && img.startsWith('data:')) ? fallbackImg : img);
+                        }
+                        if (Array.isArray(copy.thumbs)) {
+                            copy.thumbs = copy.thumbs.map(img => (typeof img === 'string' && img.startsWith('data:')) ? fallbackImg : img);
                         }
                         return copy;
                     });
-                    localStorage.setItem(key, JSON.stringify(sanitized));
-                } catch (retryErr) {
-                    console.warn(`[Storage] Fallback save failed for '${key}':`, retryErr);
+                    localStorage.setItem(key, JSON.stringify(lightData));
+                }
+            } catch (retryErr) {
+                try {
+                    if (Array.isArray(data)) {
+                        localStorage.setItem(key, JSON.stringify(data.slice(0, 20)));
+                    }
+                } catch (finalErr) {
+                    // Silently catch quota limits so live API app flow is never interrupted
                 }
             }
         }

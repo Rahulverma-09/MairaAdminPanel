@@ -41,6 +41,9 @@ async function handleProfileUpdate(e) {
         return;
     }
 
+    const submitBtn = e.target.querySelector('button[type="submit"]');
+    if (submitBtn) setButtonLoading(submitBtn, true, 'Saving...');
+
     const profileData = { name, email, role, avatar };
 
     try {
@@ -53,6 +56,8 @@ async function handleProfileUpdate(e) {
         }
     } catch (err) {
         console.warn('[Settings] Profile API update warning:', err.message);
+    } finally {
+        if (submitBtn) setButtonLoading(submitBtn, false);
     }
 
     Storage.saveProfile(profileData);
@@ -95,6 +100,9 @@ async function handlePasswordUpdate(e) {
         return;
     }
 
+    const submitBtn = e.target.querySelector('button[type="submit"]');
+    if (submitBtn) setButtonLoading(submitBtn, true, 'Updating Password...');
+
     try {
         if (typeof API !== 'undefined' && API.updatePassword) {
             await API.updatePassword({ currentPassword: currentPass, newPassword: newPass });
@@ -104,6 +112,8 @@ async function handlePasswordUpdate(e) {
     } catch (err) {
         console.error('[Settings] Password update error:', err.message);
         showToast('Failed to update password: ' + err.message, 'error');
+    } finally {
+        if (submitBtn) setButtonLoading(submitBtn, false);
     }
 }
 

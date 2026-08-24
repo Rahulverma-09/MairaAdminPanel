@@ -116,13 +116,17 @@ function renderMessages() {
             const msgId = btn.dataset.toggleMessage;
             const msg = messagesList.find(m => m.id === msgId || m._id === msgId);
             if (msg) {
+                setButtonLoading(btn, true, 'Updating...');
+                const dbId = msg._id || msg.id || msgId;
                 const nextStatus = (msg.status || 'new') === 'new' ? 'read' : 'new';
                 try {
                     if (typeof API !== 'undefined' && API.updateMessageStatus) {
-                        await API.updateMessageStatus(msgId, nextStatus);
+                        await API.updateMessageStatus(dbId, nextStatus);
                     }
                 } catch (err) {
                     console.warn('API message status error:', err);
+                } finally {
+                    setButtonLoading(btn, false);
                 }
                 msg.status = nextStatus;
                 Storage.saveMessages(messagesList);
@@ -136,12 +140,17 @@ function renderMessages() {
         btn.addEventListener('click', async () => {
             if (!confirm('Are you sure you want to delete this message?')) return;
             const msgId = btn.dataset.deleteMessage;
+            const msg = messagesList.find(m => m.id === msgId || m._id === msgId);
+            const dbId = (msg && msg._id) ? msg._id : msgId;
+            setButtonLoading(btn, true, 'Deleting...');
             try {
                 if (typeof API !== 'undefined' && API.deleteMessage) {
-                    await API.deleteMessage(msgId);
+                    await API.deleteMessage(dbId);
                 }
             } catch (err) {
                 console.warn('API delete message error:', err);
+            } finally {
+                setButtonLoading(btn, false);
             }
             messagesList = messagesList.filter(m => m.id !== msgId && m._id !== msgId);
             Storage.saveMessages(messagesList);

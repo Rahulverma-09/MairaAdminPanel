@@ -185,7 +185,7 @@ function renderCategories() {
         btn.addEventListener('click', () => editCategory(btn.dataset.editCategory));
     });
     tbody.querySelectorAll('[data-delete-category]').forEach(btn => {
-        btn.addEventListener('click', () => deleteCategory(btn.dataset.deleteCategory));
+        btn.addEventListener('click', () => deleteCategory(btn.dataset.deleteCategory, btn));
     });
 }
 
@@ -205,7 +205,7 @@ function editCategory(id) {
     if (category) openCategoryModal(category);
 }
 
-async function deleteCategory(id) {
+async function deleteCategory(id, btnElement) {
     const category = categoriesList.find(c => (c.id === id || c._id === id));
     if (!category) return;
     
@@ -217,9 +217,11 @@ async function deleteCategory(id) {
         if (!confirm('Are you sure you want to delete this category?')) return;
     }
 
+    if (btnElement) setButtonLoading(btnElement, true, 'Deleting...');
+    const dbId = category._id || category.id || id;
     try {
         if (typeof API !== 'undefined' && API.deleteCategory) {
-            await API.deleteCategory(id);
+            await API.deleteCategory(dbId);
         }
         categoriesList = categoriesList.filter(c => c.id !== id && c._id !== id);
         Storage.saveCategories(categoriesList);
@@ -228,6 +230,8 @@ async function deleteCategory(id) {
     } catch (e) {
         console.error('API delete category error:', e);
         showToast('Failed to delete category: ' + e.message, 'error');
+    } finally {
+        if (btnElement) setButtonLoading(btnElement, false);
     }
 }
 
@@ -242,6 +246,9 @@ async function handleCategoryForm(e) {
         showToast('Category name is required', 'error');
         return;
     }
+
+    const submitBtn = e.target.querySelector('button[type="submit"]');
+    if (submitBtn) setButtonLoading(submitBtn, true, isEdit ? 'Saving...' : 'Creating...');
 
     // Auto-generate Category ID if new
     const autogenCode = generateCategoryId(name);
@@ -262,8 +269,10 @@ async function handleCategoryForm(e) {
     let savedCategory = catData;
     try {
         if (typeof API !== 'undefined') {
+            const targetCategory = categoriesList.find(c => c.id === catId || c._id === catId);
+            const dbId = (targetCategory && targetCategory._id) ? targetCategory._id : catId;
             if (isEdit && API.updateCategory) {
-                const apiRes = await API.updateCategory(catId, catData);
+                const apiRes = await API.updateCategory(dbId, catData);
                 if (apiRes && apiRes.data) {
                     savedCategory = apiRes.data.category || apiRes.data;
                 }
@@ -277,9 +286,11 @@ async function handleCategoryForm(e) {
     } catch (apiErr) {
         console.error('API category sync error:', apiErr);
         showToast('Failed to save category: ' + apiErr.message, 'error');
+        if (submitBtn) setButtonLoading(submitBtn, false);
         return;
     }
 
+    if (submitBtn) setButtonLoading(submitBtn, false);
     closeModal('category-modal');
     showToast(isEdit ? 'Category updated successfully' : `Category ${savedCategory.name || catData.name} created successfully`, 'success');
     await loadCategoriesData();
