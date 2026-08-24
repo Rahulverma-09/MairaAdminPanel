@@ -30,7 +30,7 @@ function initCharts() {
             data: {
                 labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug'],
                 datasets: [{
-                    label: 'Revenue ($)',
+                    label: 'Revenue (R)',
                     data: [12450, 15800, 14200, 18900, 21500, 19800, 24600, 28450],
                     borderColor: '#c9a96e',
                     borderWidth: 2.5,
@@ -63,7 +63,7 @@ function initCharts() {
                         displayColors: false,
                         callbacks: {
                             label: function (context) {
-                                return 'Revenue: $' + context.parsed.y.toLocaleString();
+                                return 'Revenue: R ' + context.parsed.y.toLocaleString();
                             }
                         }
                     }
@@ -88,7 +88,7 @@ function initCharts() {
                             color: '#8c827a',
                             font: { size: 11 },
                             callback: function (value) {
-                                return '$' + (value >= 1000 ? (value / 1000) + 'k' : value);
+                                return 'R ' + (value >= 1000 ? (value / 1000) + 'k' : value);
                             }
                         }
                     }

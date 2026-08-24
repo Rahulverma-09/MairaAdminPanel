@@ -397,7 +397,7 @@ function viewCustomerDetails(id) {
                 <h4 style="font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.6px; color: var(--color-muted); margin-bottom: 0.75rem; font-weight: 700;">Financial & Purchase Summary</h4>
                 <div class="detail-row" style="margin-bottom: 0.5rem;"><span class="detail-row__label" style="font-size: 0.8rem; color: #7c746b;">Lifetime Orders:</span> <span class="detail-row__value" style="font-weight: 700; color: var(--color-charcoal);">${totalOrders}</span></div>
                 <div class="detail-row" style="margin-bottom: 0.5rem;"><span class="detail-row__label" style="font-size: 0.8rem; color: #7c746b;">Lifetime Revenue:</span> <span class="detail-row__value" style="font-weight: 700; color: #059669; font-size: 1rem;">${formatPrice(totalRevenue)}</span></div>
-                <div class="detail-row"><span class="detail-row__label" style="font-size: 0.8rem; color: #7c746b;">Average Spend / Order:</span> <span class="detail-row__value" style="font-weight: 600;">${totalOrders > 0 ? formatPrice(totalRevenue / totalOrders) : '$0.00'}</span></div>
+                <div class="detail-row"><span class="detail-row__label" style="font-size: 0.8rem; color: #7c746b;">Average Spend / Order:</span> <span class="detail-row__value" style="font-weight: 600;">${totalOrders > 0 ? formatPrice(totalRevenue / totalOrders) : 'R 0.00'}</span></div>
             </div>
         </div>
 

@@ -27,7 +27,7 @@ function requireAuth() {
 
 // ============ FORMATTING & UTILITIES ============
 function formatPrice(val) {
-    return '$' + Number(val).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    return 'R ' + Number(val).toLocaleString('en-ZA', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 }
 
 function formatDate(dateStr) {
