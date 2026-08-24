@@ -52,6 +52,8 @@ async function handleProfileUpdate(e) {
             if (res && res.data) {
                 profileData.name = res.data.name || name;
                 profileData.email = res.data.email || email;
+                profileData.role = res.data.role || role;
+                profileData.avatar = res.data.avatar || avatar;
             }
         }
     } catch (err) {
