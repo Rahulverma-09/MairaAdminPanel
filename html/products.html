@@ -104,6 +104,7 @@
                                 <th>Product Details</th>
                                 <th>Category</th>
                                 <th style="text-align: right;">Price (R)</th>
+                                <th style="text-align: center;">Stock</th>
                                 <th>Specifications</th>
                                 <th style="text-align: center;">Badge</th>
                                 <th style="text-align: center; width: 130px;">Actions</th>
@@ -139,6 +140,10 @@
                         <div class="form-group">
                             <label for="product-price">Price in ZAR (R) *</label>
                             <input type="number" id="product-price" step="0.01" min="0" placeholder="e.g. 2450.00" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="product-stock">Available Stock *</label>
+                            <input type="number" id="product-stock" min="0" placeholder="e.g. 25" value="10" required>
                         </div>
                         <div class="form-group">
                             <label for="product-badge">Badge</label>

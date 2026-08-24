@@ -163,6 +163,13 @@ function renderProducts() {
             specsBadgesHtml = `<span class="table-spec-chip">${escapeHtml(product.specs)}</span>`;
         }
 
+        const stockVal = product.stock != null ? Number(product.stock) : (product.countInStock != null ? Number(product.countInStock) : (product.availableStock != null ? Number(product.availableStock) : 10));
+        const stockBadge = stockVal > 5 
+            ? `<span class="status-badge status-badge--delivered"><span class="status-dot"></span>${stockVal} available</span>`
+            : (stockVal > 0 
+                ? `<span class="status-badge status-badge--pending"><span class="status-dot"></span>${stockVal} low stock</span>` 
+                : `<span class="status-badge status-badge--cancelled"><span class="status-dot"></span>Out of stock</span>`);
+
         return `
             <tr>
                 <td>
@@ -182,6 +189,7 @@ function renderProducts() {
                 </td>
                 <td><span style="font-weight: 600; color: #4a443d;">${escapeHtml(product.category)}</span></td>
                 <td style="text-align: right;"><strong style="color: var(--color-charcoal); font-weight: 700; font-size: 0.92rem;">${escapeHtml(product.price || formatPrice(product.priceNum || 0))}</strong></td>
+                <td style="text-align: center;">${stockBadge}</td>
                 <td>
                     ${specsBadgesHtml}
                 </td>
@@ -297,12 +305,17 @@ function openProductModal(product) {
     const specsTextInput = document.getElementById('product-specs-input');
     const descTextarea = document.getElementById('product-description');
 
+    const stockInput = document.getElementById('product-stock');
+
     if (isEdit) {
         const prodId = product._id || product.id || '';
         idInput.value = prodId;
         nameInput.value = product.name || '';
         catSelect.value = product.category || '';
         priceInput.value = product.priceNum != null ? product.priceNum : (typeof product.price === 'number' ? product.price : '');
+        if (stockInput) {
+            stockInput.value = product.stock != null ? product.stock : (product.countInStock != null ? product.countInStock : (product.availableStock != null ? product.availableStock : 10));
+        }
         badgeSelect.value = product.badge || '';
         if (detailsInput) detailsInput.value = product.details || '';
         if (specsTextInput) specsTextInput.value = '';
@@ -319,6 +332,7 @@ function openProductModal(product) {
         nameInput.value = '';
         catSelect.value = '';
         priceInput.value = '';
+        if (stockInput) stockInput.value = 10;
         badgeSelect.value = '';
         if (detailsInput) detailsInput.value = '';
         if (specsTextInput) specsTextInput.value = '';
@@ -397,6 +411,10 @@ async function handleProductForm(e) {
         ? currentProductImages 
         : ['https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?auto=format&fit=crop&w=800&q=80'];
 
+    const stockInput = document.getElementById('product-stock');
+    const rawStock = stockInput ? parseInt(stockInput.value, 10) : 10;
+    const stock = isNaN(rawStock) ? 10 : Math.max(0, rawStock);
+
     const productData = {
         id,
         productId: autogenCode,
@@ -405,6 +423,9 @@ async function handleProductForm(e) {
         category,
         price: formatPrice(priceNum),
         priceNum,
+        stock,
+        countInStock: stock,
+        availableStock: stock,
         details: details || '',
         specs: specsString,
         description: description || details || '',
