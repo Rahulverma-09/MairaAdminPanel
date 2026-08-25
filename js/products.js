@@ -34,7 +34,8 @@ async function loadProductsData() {
     // 2. Fetch Products live from API
     try {
         if (typeof API !== 'undefined' && API.getProducts) {
-            const res = await API.getProducts({ limit: 100 });
+            // sort=_id is set by default in API.getProducts to avoid MongoDB in-memory sort limit
+            const res = await API.getProducts();
             if (res && res.data) {
                 const rawList = Array.isArray(res.data) ? res.data : (res.data.products || []);
                 productsList = rawList.map((p, index) => {

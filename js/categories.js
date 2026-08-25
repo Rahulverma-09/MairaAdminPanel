@@ -49,7 +49,7 @@ async function loadCategoriesData() {
     // 2. Fetch live products from API to calculate real-time product counts
     try {
         if (typeof API !== 'undefined' && API.getProducts) {
-            const prodRes = await API.getProducts({ limit: 200 });
+            const prodRes = await API.getProducts(); // sort=_id set by default in API.getProducts
             if (prodRes && prodRes.data) {
                 allProductsList = Array.isArray(prodRes.data) ? prodRes.data : (prodRes.data.products || []);
                 Storage.saveProducts(allProductsList);

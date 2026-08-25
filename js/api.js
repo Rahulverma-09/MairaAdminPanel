@@ -81,7 +81,10 @@ const API = {
     },
 
     getProducts: async function (params = {}) {
-        const query = new URLSearchParams(params).toString();
+        // Always sort by _id (indexed) to avoid MongoDB in-memory sort memory limit (32MB).
+        // Sorting on non-indexed fields with large collections exceeds the limit and aborts.
+        const mergedParams = { sort: '_id', ...params };
+        const query = new URLSearchParams(mergedParams).toString();
         const endpoint = '/products' + (query ? '?' + query : '');
         return await this.request(endpoint);
     },
