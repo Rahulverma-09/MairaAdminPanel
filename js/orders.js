@@ -122,6 +122,10 @@ function renderOrders() {
         const itemCount = items.reduce((sum, i) => sum + (i.quantity || i.qty || 1), 0);
         const customer = extractOrderCustomer(order);
         const totalAmount = extractOrderTotal(order);
+        const payStatusVal = getPaymentStatusVal(order);
+        const payStatusBadge = payStatusVal === 'completed'
+            ? `<span class="status-badge status-badge--delivered" style="font-size: 0.68rem; padding: 2px 6px;" title="Payment Verified">Paid</span>`
+            : `<span class="status-badge status-badge--pending" style="font-size: 0.68rem; padding: 2px 6px;" title="Awaiting Manual WhatsApp/EFT Payment">Unpaid</span>`;
 
         return `
             <tr>
@@ -146,6 +150,9 @@ function renderOrders() {
                         <option value="delivered" ${order.status === 'delivered' ? 'selected' : ''}>Delivered</option>
                         <option value="cancelled" ${order.status === 'cancelled' ? 'selected' : ''}>Cancelled</option>
                     </select>
+                    <div style="margin-top: 4px; display: flex; align-items: center; justify-content: center;">
+                        ${payStatusBadge}
+                    </div>
                 </td>
                 <td style="color: var(--color-muted); font-size: 0.82rem;">${formatDate(order.date || order.createdAt || order.orderDate)}</td>
                 <td>
@@ -291,6 +298,30 @@ function showOrderItemsModal(order) {
     openModal('order-items-modal');
 }
 
+function getPaymentMethodDisplay(order) {
+    if (!order) return 'WhatsApp / Direct Bank Transfer';
+    const raw = order.paymentMethod || order.method || order.payment_method || '';
+    if (!raw) return 'WhatsApp / Bank Transfer (Manual Payment)';
+    if (raw.toLowerCase().includes('whatsapp') || raw.toLowerCase().includes('bank') || raw.toLowerCase().includes('manual') || raw.toLowerCase().includes('details')) {
+        return raw;
+    }
+    return raw;
+}
+
+function getPaymentStatusVal(order) {
+    if (!order) return 'pending';
+    if (order.paymentStatus) {
+        const s = String(order.paymentStatus).toLowerCase();
+        if (s === 'paid' || s === 'completed') return 'completed';
+        if (s === 'unpaid' || s === 'pending') return 'pending';
+        return s;
+    }
+    if (order.isPaid === true) return 'completed';
+    if (order.isPaid === false) return 'pending';
+    if (order.status === 'delivered') return 'completed';
+    return 'pending'; // Default is pending/unpaid until manually verified
+}
+
 function showOrderDetails(order) {
     const body = document.getElementById('order-details-body');
     if (!body) return;
@@ -298,6 +329,8 @@ function showOrderDetails(order) {
     const orderId = order.id || order._id || order.orderNumber || order.code || 'N/A';
     const items = extractOrderItems(order);
     const customer = extractOrderCustomer(order);
+    const payMethodDisplay = getPaymentMethodDisplay(order);
+    const payStatusVal = getPaymentStatusVal(order);
 
     const itemsHtml = items.map(item => `
         <div class="order-item">
@@ -315,8 +348,19 @@ function showOrderDetails(order) {
             <h4>Order Information</h4>
             <div class="detail-row"><span class="detail-row__label">Order ID</span><span class="detail-row__value"><span class="order-code">${escapeHtml(orderId)}</span></span></div>
             <div class="detail-row"><span class="detail-row__label">Date</span><span class="detail-row__value">${formatDate(order.date || order.createdAt || order.orderDate)}</span></div>
-            <div class="detail-row"><span class="detail-row__label">Status</span><span class="detail-row__value">${getStatusBadge(order.status)}</span></div>
-            <div class="detail-row"><span class="detail-row__label">Payment Method</span><span class="detail-row__value">${escapeHtml(order.paymentMethod || 'Credit Card')}</span></div>
+            <div class="detail-row"><span class="detail-row__label">Order Status</span><span class="detail-row__value">${getStatusBadge(order.status)}</span></div>
+            <div class="detail-row"><span class="detail-row__label">Payment Method</span><span class="detail-row__value"><strong>${escapeHtml(payMethodDisplay)}</strong></span></div>
+            <div class="detail-row">
+                <span class="detail-row__label">Payment Status</span>
+                <span class="detail-row__value">
+                    <select id="modal-payment-status-select" class="input input--select input--sm" style="font-weight: 600; padding: 3px 8px; font-size: 0.85rem; border-color: #d1c7b7;">
+                        <option value="pending" ${payStatusVal === 'pending' ? 'selected' : ''}>⏳ Pending / Unpaid (Awaiting WhatsApp/EFT Payment)</option>
+                        <option value="completed" ${payStatusVal === 'completed' ? 'selected' : ''}>✅ Paid (Completed)</option>
+                        <option value="failed" ${payStatusVal === 'failed' ? 'selected' : ''}>❌ Failed</option>
+                        <option value="refunded" ${payStatusVal === 'refunded' ? 'selected' : ''}>↩️ Refunded</option>
+                    </select>
+                </span>
+            </div>
         </div>
         <div class="detail-section">
             <h4>Customer Information</h4>
@@ -336,6 +380,27 @@ function showOrderDetails(order) {
             <div class="detail-row"><span class="detail-row__label">Total</span><span class="detail-row__value" style="color: #9e7f47; font-size: 1.1rem; font-weight: 700;">${formatPrice(extractOrderTotal(order))}</span></div>
         </div>
     `;
+
+    const modalPaySelect = document.getElementById('modal-payment-status-select');
+    if (modalPaySelect) {
+        modalPaySelect.addEventListener('change', async (e) => {
+            const newPayStatus = e.target.value;
+            order.paymentStatus = newPayStatus;
+            order.isPaid = (newPayStatus === 'completed');
+            
+            try {
+                if (typeof API !== 'undefined' && API.updateOrderPaymentStatus) {
+                    await API.updateOrderPaymentStatus(orderId, newPayStatus);
+                }
+            } catch (err) {
+                console.warn('[Orders] Payment status update API warning:', err.message);
+            }
+            
+            Storage.saveOrders(ordersList);
+            renderOrders();
+            showToast(`Payment status updated to ${newPayStatus.toUpperCase()}`, 'success');
+        });
+    }
 
     openModal('order-modal');
 }

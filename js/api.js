@@ -166,11 +166,32 @@ const API = {
         return await this.request('/orders/' + id);
     },
 
-    updateOrderStatus: async function (id, status) {
+    updateOrderStatus: async function (id, status, paymentStatus) {
         return await this.request('/orders/' + id + '/status', {
             method: 'PATCH',
-            body: JSON.stringify({ status })
+            body: JSON.stringify({ status, paymentStatus })
         });
+    },
+
+    updateOrderPaymentStatus: async function (id, paymentStatus) {
+        try {
+            return await this.request('/orders/' + id + '/payment-status', {
+                method: 'PATCH',
+                body: JSON.stringify({ paymentStatus })
+            });
+        } catch (e) {
+            try {
+                return await this.request('/orders/' + id + '/status', {
+                    method: 'PATCH',
+                    body: JSON.stringify({ paymentStatus })
+                });
+            } catch (e2) {
+                return await this.request('/orders/' + id, {
+                    method: 'PUT',
+                    body: JSON.stringify({ paymentStatus })
+                });
+            }
+        }
     },
 
     deleteOrder: async function (id) {
