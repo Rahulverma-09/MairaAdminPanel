@@ -95,7 +95,13 @@ const Storage = {
     saveProducts(data) { this.saveData(STORAGE_KEYS.PRODUCTS, data); },
     getCategories() { return this.getData(STORAGE_KEYS.CATEGORIES, DEFAULT_CATEGORIES); },
     saveCategories(data) { this.saveData(STORAGE_KEYS.CATEGORIES, data); },
-    getOrders() { return this.getData(STORAGE_KEYS.ORDERS, DEFAULT_ORDERS); },
+    getOrders() { 
+        let orders = this.getData(STORAGE_KEYS.ORDERS, null);
+        if (!orders || !Array.isArray(orders) || orders.length === 0) {
+            orders = this.getData('maira_orders', null) || this.getData('orders', null) || DEFAULT_ORDERS;
+        }
+        return orders;
+    },
     saveOrders(data) { this.saveData(STORAGE_KEYS.ORDERS, data); },
     getPayments() { return this.getData(STORAGE_KEYS.PAYMENTS, DEFAULT_PAYMENTS); },
     savePayments(data) { this.saveData(STORAGE_KEYS.PAYMENTS, data); },

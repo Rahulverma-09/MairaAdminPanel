@@ -144,7 +144,22 @@ const API = {
     getOrders: async function (params = {}) {
         const query = new URLSearchParams(params).toString();
         const endpoint = '/orders' + (query ? '?' + query : '');
-        return await this.request(endpoint);
+        try {
+            return await this.request(endpoint);
+        } catch (e) {
+            try {
+                return await this.request('/orders/all' + (query ? '?' + query : ''));
+            } catch (e2) {
+                return await this.request('/orders/admin' + (query ? '?' + query : ''));
+            }
+        }
+    },
+
+    createOrder: async function (orderData) {
+        return await this.request('/orders', {
+            method: 'POST',
+            body: JSON.stringify(orderData)
+        });
     },
 
     getOrderById: async function (id) {
