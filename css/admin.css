@@ -1011,6 +1011,89 @@ body {
     font-weight: 700;
 }
 
+/* ============ CUSTOMER PILL BADGES ============ */
+.customer-pill-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    padding: 0.28rem 0.75rem 0.28rem 0.35rem;
+    border-radius: 9999px;
+    font-size: 0.82rem;
+    font-weight: 600;
+    font-family: var(--font-sans);
+    cursor: pointer;
+    text-decoration: none;
+    border: 1px solid transparent;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    background: #f7f4ee;
+    color: var(--color-charcoal);
+    line-height: 1;
+    white-space: nowrap;
+}
+
+.customer-pill-badge:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+    filter: brightness(0.97);
+}
+
+.customer-pill-avatar {
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: #ffffff;
+    flex-shrink: 0;
+    box-shadow: inset 0 1px 2px rgba(255, 255, 255, 0.3), 0 1px 3px rgba(0, 0, 0, 0.12);
+}
+
+.customer-pill-name {
+    letter-spacing: 0.1px;
+}
+
+/* ============ PAYMENT STATUS SELECT ============ */
+.payment-status-select {
+    padding: 0.3rem 0.65rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    border-radius: 9999px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-align: center;
+    border: 1px solid var(--color-border);
+    font-family: var(--font-sans);
+    outline: none;
+}
+
+.payment-status-select.pay-badge--paid {
+    background: #ecfdf5;
+    color: #047857;
+    border-color: #a7f3d0;
+}
+
+.payment-status-select.pay-badge--unpaid {
+    background: #fffbeb;
+    color: #b45309;
+    border-color: #fde68a;
+}
+
+.payment-status-select.pay-badge--failed {
+    background: #fff1f2;
+    color: #be123c;
+    border-color: #fecdd3;
+}
+
+.payment-status-select.pay-badge--refunded {
+    background: #f8fafc;
+    color: #475569;
+    border-color: #cbd5e1;
+}
+
 /* ============ MESSAGE LIST ============ */
 .message-list {
     padding: 0.25rem 0;

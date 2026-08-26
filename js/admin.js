@@ -539,18 +539,28 @@
         filtered = [...filtered].sort((a, b) => new Date(b.date) - new Date(a.date));
 
         if (filtered.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="7" class="empty-state"><div class="empty-state__icon">📦</div><div class="empty-state__text">No orders found</div></td></tr>';
+            tbody.innerHTML = '<tr><td colspan="8" class="empty-state"><div class="empty-state__icon">📦</div><div class="empty-state__text">No orders found</div></td></tr>';
             return;
         }
 
         tbody.innerHTML = filtered.map(order => {
-            const itemCount = order.items.reduce((sum, i) => sum + (i.quantity || 1), 0);
+            const itemCount = (order.items || []).reduce((sum, i) => sum + (i.quantity || 1), 0);
+            const custName = (order.customer && order.customer.name) || order.customerName || 'Customer';
+            const payStatusVal = order.paymentStatus || (order.isPaid ? 'completed' : 'pending');
+            const payStatusClass = payStatusVal === 'completed' ? 'pay-badge--paid' : (payStatusVal === 'failed' ? 'pay-badge--failed' : (payStatusVal === 'refunded' ? 'pay-badge--refunded' : 'pay-badge--unpaid'));
+            const initial = (custName || 'C').charAt(0).toUpperCase();
+
             return `
                 <tr>
-                    <td><strong>${escapeHtml(order.id)}</strong></td>
-                    <td>${escapeHtml(order.customer.name)}</td>
-                    <td>${itemCount} item(s)</td>
-                    <td>${formatPrice(order.total)}</td>
+                    <td><span class="order-code">${escapeHtml(order.id || order._id || 'N/A')}</span></td>
+                    <td>
+                        <button type="button" class="customer-pill-badge" data-customer-order="${escapeHtml(order.id || order._id || 'N/A')}" title="View customer profile">
+                            <span class="customer-pill-avatar" style="background: linear-gradient(135deg, #a8894f, #c9a96e);">${initial}</span>
+                            <span class="customer-pill-name">${escapeHtml(custName)}</span>
+                        </button>
+                    </td>
+                    <td><span class="table-item-pill">${itemCount} item(s)</span></td>
+                    <td><strong style="color: var(--color-charcoal); font-weight: 700;">${formatPrice(order.total || 0)}</strong></td>
                     <td>
                         <select class="input input--select order-status-select" data-order-id="${order.id}">
                             <option value="pending" ${order.status === 'pending' ? 'selected' : ''}>Pending</option>
@@ -560,7 +570,15 @@
                             <option value="cancelled" ${order.status === 'cancelled' ? 'selected' : ''}>Cancelled</option>
                         </select>
                     </td>
-                    <td>${formatDate(order.date)}</td>
+                    <td>
+                        <select class="input input--select payment-status-select ${payStatusClass}" data-order-id="${order.id}">
+                            <option value="pending" ${payStatusVal === 'pending' ? 'selected' : ''}>Unpaid</option>
+                            <option value="completed" ${payStatusVal === 'completed' ? 'selected' : ''}>Paid</option>
+                            <option value="failed" ${payStatusVal === 'failed' ? 'selected' : ''}>Failed</option>
+                            <option value="refunded" ${payStatusVal === 'refunded' ? 'selected' : ''}>Refunded</option>
+                        </select>
+                    </td>
+                    <td style="color: var(--color-muted); font-size: 0.82rem;">${formatDate(order.date || order.createdAt)}</td>
                     <td>
                         <div class="actions">
                             <button class="btn btn--sm btn--secondary" data-view-order="${order.id}">View</button>

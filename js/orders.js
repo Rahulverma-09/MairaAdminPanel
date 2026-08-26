@@ -42,10 +42,40 @@ function extractOrderTotal(order) {
     return 0;
 }
 
+function getCustomerAvatarColor(name) {
+    const colors = [
+        { bg: 'linear-gradient(135deg, #a8894f, #c9a96e)', pillBg: '#fdfaf3', border: '#e8dcbe', text: '#5c461e' },
+        { bg: 'linear-gradient(135deg, #059669, #10b981)', pillBg: '#ecfdf5', border: '#a7f3d0', text: '#046c4e' },
+        { bg: 'linear-gradient(135deg, #2563eb, #3b82f6)', pillBg: '#eff6ff', border: '#bfdbfe', text: '#1d4ed8' },
+        { bg: 'linear-gradient(135deg, #7c3aed, #8b5cf6)', pillBg: '#f5f3ff', border: '#ddd6fe', text: '#6d28d9' },
+        { bg: 'linear-gradient(135deg, #e11d48, #f43f5e)', pillBg: '#fff1f2', border: '#fecdd3', text: '#be123c' },
+        { bg: 'linear-gradient(135deg, #d97706, #f59e0b)', pillBg: '#fffbeb', border: '#fde68a', text: '#b45309' },
+        { bg: 'linear-gradient(135deg, #0891b2, #06b6d4)', pillBg: '#ecfeff', border: '#a5f3fc', text: '#0e7490' }
+    ];
+    let hash = 0;
+    const str = name || 'Customer';
+    for (let i = 0; i < str.length; i++) {
+        hash = str.charCodeAt(i) + ((hash << 5) - hash);
+    }
+    const index = Math.abs(hash) % colors.length;
+    return colors[index];
+}
+
+function renderCustomerPill(customerName, orderId) {
+    const colorTheme = getCustomerAvatarColor(customerName);
+    const initial = (customerName || 'C').charAt(0).toUpperCase();
+    return `
+        <button type="button" class="customer-pill-badge" data-customer-order="${escapeHtml(orderId)}" title="View customer profile" style="background: ${colorTheme.pillBg}; border-color: ${colorTheme.border}; color: ${colorTheme.text};">
+            <span class="customer-pill-avatar" style="background: ${colorTheme.bg};">${initial}</span>
+            <span class="customer-pill-name">${escapeHtml(customerName)}</span>
+        </button>
+    `;
+}
+
 async function loadOrdersData() {
     const tbody = document.getElementById('orders-table');
     if (tbody) {
-        tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; padding: 2.5rem; color: var(--color-muted);"><div class="spinner" style="margin: 0 auto 0.5rem;"></div>Loading orders...</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="8" style="text-align:center; padding: 2.5rem; color: var(--color-muted);"><div class="spinner" style="margin: 0 auto 0.5rem;"></div>Loading orders...</td></tr>';
     }
 
     try {
@@ -109,7 +139,7 @@ function renderOrders() {
     }
 
     if (totalFiltered === 0) {
-        tbody.innerHTML = '<tr><td colspan="7" class="empty-state"><div class="empty-state__icon">📦</div><div class="empty-state__text">No orders found</div><div style="font-size:0.8rem; color:var(--color-muted); margin-top:0.25rem;">New customer purchases will appear here automatically.</div></td></tr>';
+        tbody.innerHTML = '<tr><td colspan="8" class="empty-state"><div class="empty-state__icon">📦</div><div class="empty-state__text">No orders found</div><div style="font-size:0.8rem; color:var(--color-muted); margin-top:0.25rem;">New customer purchases will appear here automatically.</div></td></tr>';
         renderPagination('orders-pagination', 1, 0, ORDERS_PAGE_SIZE, () => {});
         return;
     }
@@ -123,18 +153,13 @@ function renderOrders() {
         const customer = extractOrderCustomer(order);
         const totalAmount = extractOrderTotal(order);
         const payStatusVal = getPaymentStatusVal(order);
-        const payStatusBadge = payStatusVal === 'completed'
-            ? `<span class="status-badge status-badge--delivered" style="font-size: 0.68rem; padding: 2px 6px;" title="Payment Verified">Paid</span>`
-            : `<span class="status-badge status-badge--pending" style="font-size: 0.68rem; padding: 2px 6px;" title="Awaiting Manual WhatsApp/EFT Payment">Unpaid</span>`;
+        const payStatusClass = payStatusVal === 'completed' ? 'pay-badge--paid' : (payStatusVal === 'failed' ? 'pay-badge--failed' : (payStatusVal === 'refunded' ? 'pay-badge--refunded' : 'pay-badge--unpaid'));
 
         return `
             <tr>
                 <td><span class="order-code">${escapeHtml(orderId)}</span></td>
                 <td>
-                    <button type="button" class="btn-link table-clickable-cell" data-customer-order="${escapeHtml(orderId)}" title="View customer profile">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: #9e7f47;"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-                        <span>${escapeHtml(customer.name)}</span>
-                    </button>
+                    ${renderCustomerPill(customer.name, orderId)}
                 </td>
                 <td>
                     <button type="button" class="table-item-pill" data-items-order="${escapeHtml(orderId)}" title="Click to view ordered items">
@@ -150,9 +175,14 @@ function renderOrders() {
                         <option value="delivered" ${order.status === 'delivered' ? 'selected' : ''}>Delivered</option>
                         <option value="cancelled" ${order.status === 'cancelled' ? 'selected' : ''}>Cancelled</option>
                     </select>
-                    <div style="margin-top: 4px; display: flex; align-items: center; justify-content: center;">
-                        ${payStatusBadge}
-                    </div>
+                </td>
+                <td>
+                    <select class="input input--select payment-status-select ${payStatusClass}" data-order-id="${escapeHtml(orderId)}">
+                        <option value="pending" ${payStatusVal === 'pending' ? 'selected' : ''}>Unpaid</option>
+                        <option value="completed" ${payStatusVal === 'completed' ? 'selected' : ''}>Paid</option>
+                        <option value="failed" ${payStatusVal === 'failed' ? 'selected' : ''}>Failed</option>
+                        <option value="refunded" ${payStatusVal === 'refunded' ? 'selected' : ''}>Refunded</option>
+                    </select>
                 </td>
                 <td style="color: var(--color-muted); font-size: 0.82rem;">${formatDate(order.date || order.createdAt || order.orderDate)}</td>
                 <td>
@@ -171,7 +201,7 @@ function renderOrders() {
         renderOrders();
     });
 
-    // Event listeners
+    // Event listeners for Order Status dropdowns
     tbody.querySelectorAll('.order-status-select').forEach(select => {
         select.addEventListener('change', async (e) => {
             const orderId = e.target.dataset.orderId;
@@ -188,6 +218,29 @@ function renderOrders() {
                 order.status = newStatus;
                 Storage.saveOrders(ordersList);
                 showToast(`Order ${orderId} status updated to ${newStatus}`, 'success');
+            }
+        });
+    });
+
+    // Event listeners for Payment Status dropdowns
+    tbody.querySelectorAll('.payment-status-select').forEach(select => {
+        select.addEventListener('change', async (e) => {
+            const orderId = e.target.dataset.orderId;
+            const newPayStatus = e.target.value;
+            const order = ordersList.find(o => o.id === orderId || o._id === orderId);
+            if (order) {
+                order.paymentStatus = newPayStatus;
+                order.isPaid = (newPayStatus === 'completed');
+                try {
+                    if (typeof API !== 'undefined' && API.updateOrderPaymentStatus) {
+                        await API.updateOrderPaymentStatus(orderId, newPayStatus);
+                    }
+                } catch (err) {
+                    console.warn('API payment status update error:', err);
+                }
+                Storage.saveOrders(ordersList);
+                showToast(`Payment status updated to ${newPayStatus.toUpperCase()}`, 'success');
+                renderOrders();
             }
         });
     });
