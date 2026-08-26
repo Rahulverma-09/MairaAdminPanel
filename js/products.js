@@ -111,7 +111,11 @@ function renderProducts() {
                 (p.details && p.details.toLowerCase().includes(term)) ||
                 (p.specs && String(p.specs).toLowerCase().includes(term)) ||
                 (p.description && p.description.toLowerCase().includes(term)) ||
-                (p.badge && p.badge.toLowerCase().includes(term));
+                (p.badge && p.badge.toLowerCase().includes(term)) ||
+                (p.color && p.color.toLowerCase().includes(term)) ||
+                (p.colour && p.colour.toLowerCase().includes(term)) ||
+                (p.sizes && p.sizes.toLowerCase().includes(term)) ||
+                (p.availableSizes && p.availableSizes.toLowerCase().includes(term));
         });
     }
     if (productCategoryFilter !== 'all') {
@@ -307,6 +311,8 @@ function openProductModal(product) {
     const descTextarea = document.getElementById('product-description');
 
     const stockInput = document.getElementById('product-stock');
+    const colorInput = document.getElementById('product-color');
+    const sizesInput = document.getElementById('product-sizes');
 
     if (isEdit) {
         const prodId = product._id || product.id || '';
@@ -318,6 +324,8 @@ function openProductModal(product) {
             stockInput.value = product.stock != null ? product.stock : (product.countInStock != null ? product.countInStock : (product.availableStock != null ? product.availableStock : 10));
         }
         badgeSelect.value = product.badge || '';
+        if (colorInput) colorInput.value = product.color || product.colour || '';
+        if (sizesInput) sizesInput.value = product.sizes || product.availableSizes || '';
         if (detailsInput) detailsInput.value = product.details || '';
         if (specsTextInput) specsTextInput.value = '';
         descTextarea.value = product.description || '';
@@ -335,6 +343,8 @@ function openProductModal(product) {
         priceInput.value = '';
         if (stockInput) stockInput.value = 10;
         badgeSelect.value = '';
+        if (colorInput) colorInput.value = '';
+        if (sizesInput) sizesInput.value = '';
         if (detailsInput) detailsInput.value = '';
         if (specsTextInput) specsTextInput.value = '';
         if (specsInput) specsInput.value = '';
@@ -382,6 +392,8 @@ async function handleProductForm(e) {
     const category = document.getElementById('product-category').value;
     const priceNum = parseFloat(document.getElementById('product-price').value) || 0;
     const badge = document.getElementById('product-badge').value;
+    const color = document.getElementById('product-color') ? document.getElementById('product-color').value.trim() : '';
+    const sizes = document.getElementById('product-sizes') ? document.getElementById('product-sizes').value.trim() : '';
     const details = (document.getElementById('product-details') ? document.getElementById('product-details').value.trim() : '');
     const description = document.getElementById('product-description').value.trim();
 
@@ -427,6 +439,10 @@ async function handleProductForm(e) {
         stock,
         countInStock: stock,
         availableStock: stock,
+        color,
+        colour: color,
+        sizes,
+        availableSizes: sizes,
         details: details || '',
         specs: specsString,
         description: description || details || '',
